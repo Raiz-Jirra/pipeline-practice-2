@@ -1,7 +1,36 @@
+"use client";
+
+
 import React from "react";
+import { useState } from "react";
 import Image from "next/image";
+import { sendJSONData } from "@/tools/Toolkit";
+
+
 
 export default function Login() {
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const grantAccess = async () => {
+        const result = await sendJSONData("/api/auth/login", {
+            email,
+            password
+        });
+
+        if (result?.data?.success) {
+            alert("Access Granted");
+            console.log("User Role:", result.data.role);
+        } else {
+            alert("Access Denied");
+            console.log("Login failed");
+        }
+    };
+
+
+
+
     return (
         <div className="min-h-screen bg-gray-100 flex items-start lg:items-center justify-center px-6 py-8 md:py-12 lg:py-0">
 
@@ -23,6 +52,8 @@ export default function Login() {
                         <input
                             type="text"
                             required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-3 py-2 border rounded"
                         />
                     </div>
@@ -34,12 +65,14 @@ export default function Login() {
                         <input
                             type="password"
                             required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-3 py-2 border rounded"
                         />
                     </div>
 
                     <div className="flex flex-col gap-3 mt-4">
-                        <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                        <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600" type="button" onClick={grantAccess}>
                             Login
                         </button>
 
@@ -51,13 +84,12 @@ export default function Login() {
                 </form>
 
                 {/* IMAGE CARD */}
-                <div className="hidden md:flex w-full lg:w-[40%] bg-white h-[448px] items-center justify-center rounded shadow-md">
+                <div className="hidden md:flex w-full lg:w-[40%] bg-white h-[448px] items-center justify-center rounded shadow-md relative">
                     <Image
-                        src="/images/01.png"
+                        src="/images/weyland2.jpg"
                         alt="Login Illustration"
-                        width={400}
-                        height={400}
-                        className="object-contain"
+                        fill={true}
+                        className="object-cover rounded"
                     />
                 </div>
 
