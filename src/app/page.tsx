@@ -1,4 +1,4 @@
-import Login from '../employee/Login';
+import Login from './employee/Login';
 
 export default function Home() {
 
