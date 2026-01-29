@@ -37,7 +37,12 @@ export default function EmployeeClaimForm() {
 
             {/* Claim Status & History Section */}
             <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-4">Claim Status & History</h2>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">Claim Status & History</h2>
+                    <button className="bg-gray-400">
+                        Create New Claim
+                    </button>
+                </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -88,9 +93,6 @@ export default function EmployeeClaimForm() {
                     </div>
                 )}
             </div>
-
-            {/* Placeholder for Create New Claim button - to be added later */}
-            {/* <button className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg">Create New Claim</button> */}
         </div>
     );
 }
