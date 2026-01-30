@@ -27,11 +27,32 @@ export default function EmployeeClaimForm() {
         }
     ];
 
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "approved":
+                return "bg-green-100 text-green-800";
+            case "pending":
+                return "bg-yellow-100 text-yellow-800";
+            case "rejected":
+                return "bg-red-100 text-red-800";
+            default:
+                return "bg-gray-100 text-gray-800";
+        }
+    };
+
     return (
         <div className="container mx-auto p-6 max-w-6xl">
             {/* Header */}
+            <header>
+                <div className="flex items-center gap-4 mb-6">
+                    <img src="/images/weyyuLogo.png" alt="Company Logo" width={150} height={150} />
+                    <div className="text-3xl font-bold">
+                        Welcome to Weyland-Yutani's Employee Claims Service
+                    </div>
+                </div>
+            </header>
             <div className="mb-6">
-                <h1 className="text-3xl font-bold mb-2">My Claims</h1>
+                <h1 className="text-3xl font-bold mb-2">Hello, Ellen Ripley!</h1>
                 <p className="text-gray-600">View your claim status and history</p>
             </div>
 
@@ -61,21 +82,21 @@ export default function EmployeeClaimForm() {
                             {mockClaims.map((claim) => (
                                 <tr key={claim.id} className="border-b hover:bg-gray-50">
                                     <td className="p-3">{claim.id}</td>
-                                    <td className="p-3">{claim.date}</td>
                                     <td className="p-3">{claim.catagory}</td>
+                                    <td className="p-3">{claim.date}</td>
                                     <td className="p-3">${claim.amount.toFixed(2)}</td>
                                     <td className="p-3">
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${(claim.status)}`}>
+                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(claim.status)}`}>
                                             {claim.status.charAt(0).toUpperCase() + claim.status.slice(1)}
                                         </span>
                                     </td>
                                     <td className="p-3">{claim.description}</td>
                                     <td className="p-3">
                                         <div className="flex gap-2">
-                                            <button className="bg-gray-400 py-2 px-2">
+                                            <button className="bg-blue-700 text-white py-2 px-2 hover:bg-blue-900">
                                                 View JPEG
                                             </button>
-                                            <button className="bg-gray-400 py-2 px-2">
+                                            <button className="bg-red-700 text-white py-2 px-2 hover:bg-red-900">
                                                 View PDF
                                             </button>
                                         </div>
