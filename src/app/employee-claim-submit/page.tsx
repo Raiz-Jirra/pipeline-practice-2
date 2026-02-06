@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function EmployeeClaimSubmit() {
 
 
@@ -67,8 +69,21 @@ export default function EmployeeClaimSubmit() {
 
                     </div>
 
-
+                    <div className="flex gap-4 md-4">
+                        {/* Address */}
+                        <div className="flex-1">
+                            <label className="block font-semibold mb-2">Address</label>
+                            <input type="text" placeholder="Enter your address" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                    </div>
                 </form>
+                <div className="flex justify-end mt-6">
+                    <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                        <Link href="/employee-claim-catagory">
+                            Continue
+                        </Link>
+                    </button>
+                </div>
             </div>
         </div>
     );

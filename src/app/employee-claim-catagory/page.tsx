@@ -1,0 +1,72 @@
+import Link from 'next/link';
+
+export default function ClaimCatagory() {
+
+
+    return (
+        <div>
+            <header>
+                <div className="flex items-center gap-4 mb-6">
+                    <img src="/images/weyyuLogo.png" alt="Company Logo" width={150} height={150} />
+                    <div className="text-3xl font-bold">
+                        Welcome to Weyland-Yutani's Employee Claims Service
+                    </div>
+                </div>
+            </header>
+
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold mb-2">Submit Your Claim!</h1>
+                <p className="text-gray-600">Please fill out the form below to submit a new claim</p>
+            </div>
+
+            {/* Claim Catagory */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-semibold mb-6">Claim Information</h2>
+
+                {/* Select Catagory */}
+                <div className='flex justify-start'>
+                    <div className="mb-4">
+                        <label className="block font-semibold mb-2">Catagory</label>
+                        <select className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select a catagory</option>
+                            <option value="option1">Food</option>
+                            <option value="option2">Travel</option>
+                            <option value="option3">Lodging</option>
+                            <option value="option3">Medical</option>
+                        </select>
+
+                        {/* Special Catagory checkbox */}
+                        <div className="mb-4">
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <span>Facehugger Exposure (If Medical is selected)</span>
+                            </label>
+                        </div>
+
+                        {/* Claim Description */}
+                        <div className="mb-4">
+                            <label className="block font-semibold mb-2">Claim Description</label>
+                            <textarea placeholder="Enter description here" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows={5} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className=''></div>
+
+
+                <div className="flex justify-between items-center mt-6">
+                    <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
+                        <Link href="/employee-claim-submit">
+                            Back
+                        </Link>
+                    </button>
+                    <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                        <Link href="">
+                            Continue
+                        </Link>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
