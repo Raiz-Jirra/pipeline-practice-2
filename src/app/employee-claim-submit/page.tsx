@@ -85,7 +85,7 @@ export default function EmployeeClaimSubmit() {
                                 Back
                             </button>
                         </Link>
-                        <Link href="/employee-claim-catagory">
+                        <Link href="/employee-claim-category">
                             <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
                                 Continue
                             </button>
