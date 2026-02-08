@@ -60,13 +60,13 @@ export default function EmployeeClaimSubmit() {
                             {/* Email Address */}
                             <div className="flex-1">
                                 <label className="block font-semibold mb-2">Email Address</label>
-                                <input type="text" placeholder="Enter your email address" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <input type="emial" placeholder="Enter your email address" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
 
                             {/* Phone Number */}
                             <div className="flex-1">
                                 <label className="block font-semibold mb-2">Phone Number</label>
-                                <input type="text" placeholder="Enter your phone number" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <input type="tel" placeholder="Enter your phone number" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
 
                         </div>
