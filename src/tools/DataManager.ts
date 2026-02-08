@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { MongoClient } from "mongodb";
+import sanitizeHtml from 'sanitize-html';
 import { NextRequest, NextResponse } from 'next/server';
 
 // MongoDB constants
@@ -13,7 +14,12 @@ export async function loginUser(request: NextRequest) {
         await mongoClient.connect();
 
         const body = await request.json();
-        const { email, password } = body;
+        // const { email, password } = body;
+        body.email = sanitizeHtml(body.email);
+        body.password = sanitizeHtml(body.password);
+
+        const email = body.email;
+        const password = body.password;
 
         const db = mongoClient.db(MONGO_DB_NAME);
         const users = db.collection("users");
@@ -43,4 +49,45 @@ export async function loginUser(request: NextRequest) {
     }
 }
 
+
+export async function addUser(request: NextRequest) {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+        const body = await request.json();
+
+        // sanitize inputs
+        const firstName = sanitizeHtml(body.firstName);
+        const lastName = sanitizeHtml(body.lastName);
+        const email = sanitizeHtml(body.email);
+        const password = sanitizeHtml(body.password);
+
+        // hash password
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const users = db.collection("users");
+
+        const result = await users.insertOne({
+            firstName,
+            lastName,
+            email,
+            passwordHash,
+            role: "EMPLOYEE",
+            createdAt: new Date()
+        });
+
+        if (!result.insertedId) {
+            return NextResponse.json({ success: false }, { status: 400 });
+        }
+
+        return NextResponse.json({ success: true });
+
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message }, { status: 500 });
+    } finally {
+        await mongoClient.close();
+    }
+}
 

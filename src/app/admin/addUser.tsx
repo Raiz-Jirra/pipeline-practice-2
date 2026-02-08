@@ -1,18 +1,46 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { sendJSONData } from "@/tools/Toolkit";
 
 export default function AddEmployee() {
+    const router = useRouter();
+    const POST_URL = "/api/admin/user";
 
     const [firstName, setFirstName] = useState<string>("");
     const [lastName, setLastName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        console.log(firstName, lastName, email, password);
+        try {
+            const responseData = await sendJSONData(POST_URL, { firstName, lastName, email, password });
+
+            if (!responseData) {
+                alert("Network error. Please try again.");
+            } else if (responseData.status === 400) {
+                alert("Invalid input. Please check your fields.");
+            } else if (responseData.status === 500) {
+                alert("Server error. Please try again later.");
+            } else if (responseData.status === 200) {
+                alert("Employee created successfully");
+                setFirstName("");
+                setLastName("");
+                setEmail("");
+                setPassword("");
+                router.push("/");
+            }
+
+        } catch (error: any) {
+            alert("Unexpected error: " + error.message);
+        }
+
+
     };
 
     return (
