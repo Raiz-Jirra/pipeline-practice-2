@@ -12,7 +12,7 @@ services:
     environment:
       MONGO_INITDB_DATABASE: dbData
     ports:
-      - "27017:27017"
+      - "27100:27017"
     networks:
       - linkednetwork
 
