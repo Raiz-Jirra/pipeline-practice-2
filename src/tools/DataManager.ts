@@ -14,9 +14,9 @@ export async function loginUser(request: NextRequest) {
         await mongoClient.connect();
 
         const body = await request.json();
-        // const { email, password } = body;
         body.email = sanitizeHtml(body.email);
         body.password = sanitizeHtml(body.password);
+
 
         const email = body.email;
         const password = body.password;
@@ -62,6 +62,11 @@ export async function addUser(request: NextRequest) {
         const lastName = sanitizeHtml(body.lastName);
         const email = sanitizeHtml(body.email);
         const password = sanitizeHtml(body.password);
+
+        // const firstName = body.firstName;
+        // const lastName = body.lastName;
+        // const email = body.email;
+        // const password = body.password;
 
         // hash password
         const passwordHash = await bcrypt.hash(password, 10);

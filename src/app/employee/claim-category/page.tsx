@@ -52,12 +52,12 @@ export default function ClaimCatagory() {
                     </div>
 
                     <div className="flex justify-between items-center mt-6">
-                        <Link href="/employee-claim-submit">
+                        <Link href="/employee/claim-submit">
                             <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
                                 Back
                             </button>
                         </Link>
-                        <Link href="/employee-claim-success">
+                        <Link href="/employee/claim-success">
                             <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
                                 Submit
                             </button>

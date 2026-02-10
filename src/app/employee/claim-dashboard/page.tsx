@@ -63,7 +63,7 @@ export default function EmployeeClaimForm() {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Claim Status & History</h2>
                     <button className="bg-blue-500 text-white py-2 px-2 hover:bg-blue-800">
-                        <Link href="/employee-claim-submit">
+                        <Link href="/employee/claim-submit">
                             Create New Claim
                         </Link>
                     </button>

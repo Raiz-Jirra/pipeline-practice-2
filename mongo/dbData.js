@@ -1,13 +1,12 @@
 db.users.drop();
-db.claims.drop();
 
 // USERS
-db.users.insertMany([
+db.users.insert([
     {
         firstName: "Admin",
         lastName: "User",
         email: "admin@test.com",
-        passwordHash: "$2b$10$exampleAdminHash",
+        passwordHash: "$2b$10$xXjv0Wldd2fDBX.Ezo2UnOgcWmLhtRnmILetJGBdnLR/OEpmm4Uoa",
         role: "ADMIN",
         createdAt: new Date()
     },
@@ -15,18 +14,17 @@ db.users.insertMany([
         firstName: "Ellen",
         lastName: "Ripley",
         email: "ellen.ripley@test.com",
-        passwordHash: "$2b$10$exampleEmployeeHash",
+        passwordHash: "$2b$10$P6TYf8XjzTtuDECKpA/46euImibazFDxsI3e3t4uH2GVwrs4a5ArS",
         role: "EMPLOYEE",
         createdAt: new Date()
     }
 ]);
 
-// const ellen = db.users.findOne({ email: "ellen.ripley@test.com" });
 
-db.claims.insertMany([
+db.claims.drop();
+db.claims.insert([
     {
         claimId: "CLM-001",
-        // employeeId: ellen._id,
         category: "Travel",
         amount: 2000,
         description: "Off-world travel expenses",
@@ -37,7 +35,6 @@ db.claims.insertMany([
     },
     {
         claimId: "CLM-002",
-        // employeeId: ellen._id,
         category: "Lodging",
         amount: 1500,
         description: "Station lodging",
@@ -47,3 +44,4 @@ db.claims.insertMany([
         createdAt: new Date()
     }
 ]);
+
