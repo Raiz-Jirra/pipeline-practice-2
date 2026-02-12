@@ -4,7 +4,7 @@ import sanitizeHtml from 'sanitize-html';
 import { NextRequest, NextResponse } from 'next/server';
 
 // MongoDB constants
-const MONGO_URL: string = "mongodb://mongo:27017/";
+const MONGO_URL: string = process.env.MONGO_URL || "mongodb://mongo:27017";
 const MONGO_DB_NAME: string = "dbData";
 
 export async function loginUser(request: NextRequest) {

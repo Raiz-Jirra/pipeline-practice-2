@@ -1,4 +1,4 @@
-import AdminSidebar from "./components/adminSidebar";
+import AdminSidebar from "../components/adminSidebar";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
