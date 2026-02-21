@@ -40,7 +40,8 @@ export async function loginUser(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            role: user.role
+            role: user.role,
+            userId: user._id.toString()
         });
 
     } catch (err: any) {
@@ -117,14 +118,40 @@ export async function getUsers() {
 
 export async function getClaims() {
     let mongoClient: MongoClient = new MongoClient(MONGO_URL);
-    let allClaims: any[];
+    let claims: any[];
     try {
         await mongoClient.connect();
 
         const db = mongoClient.db(MONGO_DB_NAME);
-        const users = db.collection("claims");
 
-        allClaims = await users.find().toArray();
+
+        claims = await db.collection("claims").aggregate([
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "employeeId",
+                    foreignField: "_id",
+                    as: "employee"
+                }
+            }, {
+                $unwind: "$employee"
+            }
+        ]).toArray();
+
+        console.log(claims);
+        return claims.map((claim) => ({
+            _id: claim._id.toString(),
+            claimId: claim.claimId,
+            category: claim.category,
+            description: claim.description,
+            amount: claim.amount,
+            status: claim.status,
+            date: claim.date?.toISOString(),
+            creadtedAt: claim.createdAt?.toISOString(),
+            firstName: claim.employee.firstName,
+            lastName: claim.employee.lastName
+        }));
+
 
     } catch (error: any) {
         console.log(`Error : ${error.message}`);
@@ -132,8 +159,6 @@ export async function getClaims() {
     } finally {
         mongoClient.close();
     }
-
-    return allClaims;
 }
 
 

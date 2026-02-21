@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-    { label: "Claims", href: "/admin/claims" },
-    { label: "Reports", href: "/admin/reports" },
+    { label: "Claims", href: "/admin/dashboard/claims" },
+    { label: "Reports", href: "/admin/dashboard/reports" },
     { label: "User management", href: "/admin/users" },
     { label: "Category management", href: "/admin/categories" }
 ];
@@ -24,6 +24,7 @@ export default function AdminSidebar() {
                     const isActive = pathname.startsWith(item.href);
 
                     return (
+
                         <Link
                             key={item.href}
                             href={item.href}

@@ -30,7 +30,7 @@ export default function Login() {
         const role = result.data.role;
 
         if (role === "ADMIN") {
-            router.push("/admin/dashboard");
+            router.push("/admin/dashboard/claims");
         } else if (!(role === "ADMIN")) {
             alert("Access Denied: You do not have admin privilages.")
         }
