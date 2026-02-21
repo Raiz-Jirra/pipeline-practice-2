@@ -42,6 +42,17 @@ db.claims.insertMany([
         medicalClaim: false,
         status: "Pending",
         createdAt: new Date()
+    },
+
+    {
+        claimId: "CLM-003",
+        category: "Medical (Facehugger Exposure)",
+        amount: 1500,
+        description: "Expose to Facehugger",
+        receipt: "receipt-003.jpg",
+        medicalClaim: true,
+        status: "Rejected",
+        createdAt: new Date()
     }
 ]);
 

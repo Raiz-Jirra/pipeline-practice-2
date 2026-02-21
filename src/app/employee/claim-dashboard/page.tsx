@@ -1,33 +1,43 @@
+"use client";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+
+interface Claim {
+    id: string | number;
+    date: string;
+    category: string;
+    amount: number;
+    status: string;
+    description: string;
+}
 
 export default function EmployeeClaimForm() {
-    // Mock data for demonstration
-    const mockClaims = [
-        {
-            id: "CLM-001",
-            date: "2026-01-15",
-            catagory: "Travel",
-            amount: 2000.00,
-            status: "approved",
-            description: "Your claim has been approved"
-        },
-        {
-            id: "CLM-002",
-            date: "2026-01-20",
-            catagory: "Lodging",
-            amount: 1500.00,
-            status: "pending",
-            description: "Your claim is currently being reviewed"
-        },
-        {
-            id: "CLM-003",
-            date: "2026-01-22",
-            catagory: "Medical (Facehugger Exposure)",
-            amount: 0,
-            status: "rejected",
-            description: "Your claim has been rejected"
-        }
-    ];
+    const [claims, setClaims] = useState<Claim[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch claims on component mount
+    useEffect(() => {
+        const fetchClaims = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('/api/employee/claims');
+                const data = await response.json();
+
+                if (data.success) {
+                    setClaims(data.claims);
+                } else {
+                    setError('Failed to load claims');
+                }
+            } catch (err) {
+                setError('Error fetching claims');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchClaims();
+    }, []);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -41,6 +51,28 @@ export default function EmployeeClaimForm() {
                 return "bg-gray-100 text-gray-800";
         }
     };
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="container mx-auto p-6 max-w-6xl">
+                <div className="text-center py-8">
+                    <p>Loading claims...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state  
+    if (error) {
+        return (
+            <div className="container mx-auto p-6 max-w-6xl">
+                <div className="text-center py-8 text-red-500">
+                    <p>{error}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto p-6 max-w-6xl">
@@ -72,47 +104,18 @@ export default function EmployeeClaimForm() {
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b">
-                                <th className="text-left p-3 font-semibold">Claim ID</th>
-                                <th className="text-left p-3 font-semibold">Category</th>
-                                <th className="text-left p-3 font-semibold">Date</th>
-                                <th className="text-left p-3 font-semibold">Amount</th>
-                                <th className="text-left p-3 font-semibold">Status</th>
-                                <th className="text-left p-3 font-semibold">Description</th>
-                                <th className="text-left p-3 font-semibold">Actions</th>
-                            </tr>
+                            <tr className="border-b"><th className="text-left p-3 font-semibold">Claim ID</th><th className="text-left p-3 font-semibold">Category</th><th className="text-left p-3 font-semibold">Date</th><th className="text-left p-3 font-semibold">Amount</th><th className="text-left p-3 font-semibold">Status</th><th className="text-left p-3 font-semibold">Description</th><th className="text-left p-3 font-semibold">Actions</th></tr>
                         </thead>
                         <tbody>
-                            {mockClaims.map((claim) => (
-                                <tr key={claim.id} className="border-b hover:bg-gray-50">
-                                    <td className="p-3">{claim.id}</td>
-                                    <td className="p-3">{claim.catagory}</td>
-                                    <td className="p-3">{claim.date}</td>
-                                    <td className="p-3">${claim.amount.toFixed(2)}</td>
-                                    <td className="p-3">
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(claim.status)}`}>
-                                            {claim.status.charAt(0).toUpperCase() + claim.status.slice(1)}
-                                        </span>
-                                    </td>
-                                    <td className="p-3">{claim.description}</td>
-                                    <td className="p-3">
-                                        <div className="flex gap-2">
-                                            <button className="bg-blue-700 text-white py-2 px-2 hover:bg-blue-900">
-                                                View JPEG
-                                            </button>
-                                            <button className="bg-red-700 text-white py-2 px-2 hover:bg-red-900">
-                                                View PDF
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            {claims.map((claim) => (
+                                <tr key={claim.id} className="border-b hover:bg-gray-50"><td className="p-3">{claim.id}</td><td className="p-3">{claim.category}</td><td className="p-3">{claim.date}</td><td className="p-3">${claim.amount.toFixed(2)}</td><td className="p-3"><span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(claim.status)}`}>{claim.status.charAt(0).toUpperCase() + claim.status.slice(1)}</span></td><td className="p-3">{claim.description}</td><td className="p-3"><div className="flex gap-2"><button className="bg-blue-700 text-white py-2 px-2 hover:bg-blue-900">View JPEG</button><button className="bg-red-700 text-white py-2 px-2 hover:bg-red-900">View PDF</button></div></td></tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
                 {/* Empty state (for when there are no claims) */}
-                {mockClaims.length === 0 && (
+                {claims.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                         <p>No claims found</p>
                     </div>
