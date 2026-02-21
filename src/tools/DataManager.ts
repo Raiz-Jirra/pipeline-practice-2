@@ -96,3 +96,35 @@ export async function addUser(request: NextRequest) {
     }
 }
 
+// Show cliams table for enployees -- Robert Jones
+export async function getClaims() {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const claims = db.collection("claims");
+
+        const claimsData = await claims.find({}).toArray();
+
+        // Map Database fields to component expectations
+        const formattedClaims = claimsData.map(claim => ({
+            id: claim.claimId,
+            date: claim.createdAt.toISOString().split('T')[0],
+            category: claim.category,
+            amount: claim.amount,
+            status: claim.status.toLowerCase(),
+            description: claim.description
+        }));
+
+        return NextResponse.json({
+            success: true,
+            claims: formattedClaims
+        });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    } finally {
+        await mongoClient.close();
+    }
+
+}
