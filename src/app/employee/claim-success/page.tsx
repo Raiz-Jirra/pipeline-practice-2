@@ -18,7 +18,7 @@ export default function ClaimSent() {
             <div className="flex flex-col items-center justify-center text-center mb-6 mt-12">
                 <p className="text-gray-600 mb-6">Return home to view the status of your claim</p>
 
-                <Link href="/employee/claim-form">
+                <Link href="/employee/claim-dashboard">
                     <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
                         Home
                     </button>

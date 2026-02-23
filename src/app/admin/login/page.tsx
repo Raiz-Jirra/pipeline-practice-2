@@ -30,7 +30,7 @@ export default function Login() {
         const role = result.data.role;
 
         if (role === "ADMIN") {
-            router.push("/admin/dashboard");
+            router.push("/admin/dashboard/claims");
         } else if (!(role === "ADMIN")) {
             alert("Access Denied: You do not have admin privilages.")
         }
@@ -77,12 +77,12 @@ export default function Login() {
                         />
                     </div>
 
-                    <div className="flex flex-col gap-3 mt-4">
+                    <div className="flex flex-col gap-7 mt-4">
                         <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600" type="button" onClick={grantAccess}>
                             Login
                         </button>
 
-                        <Link href="/employee/login/" className="text-sm text-center text-blue-500 hover:underline">
+                        <Link href="/employee/login/" className="bg-cyan-950 text-sm text-center text-blue-500 border rounded w-fit px-2 py-1">
                             Employee Login
                         </Link>
                     </div>
