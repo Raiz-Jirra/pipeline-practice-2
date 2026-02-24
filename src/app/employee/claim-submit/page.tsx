@@ -80,16 +80,16 @@ export default function EmployeeClaimSubmit() {
                         </div>
                     </form>
                     <div className="flex justify-between items-center mt-6">
-                        <Link href="/employee/claim-form">
-                            <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
+                        <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
+                            <Link href="/employee/claim-dashboard">
                                 Back
-                            </button>
-                        </Link>
-                        <Link href="/employee/claim-category">
-                            <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-                                Continue
-                            </button>
-                        </Link>
+                            </Link>
+                        </button>
+                        <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                            <Link href="/employee/claim-category">
+                                Next
+                            </Link>
+                        </button>
                     </div>
                 </div>
             </div>

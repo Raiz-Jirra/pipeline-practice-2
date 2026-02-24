@@ -8,6 +8,8 @@ export default function ClaimCatagory() {
 
     const [selectedCategory, setSelectedCategory] = useState('');
     const [facehuggerExposure, setFacehuggerExposure] = useState(false);
+    const [destination, setDestination] = useState('');
+    const [returnTrip, setReturnTrip] = useState('');
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newCategory = e.target.value;
         setSelectedCategory(newCategory);
@@ -15,6 +17,12 @@ export default function ClaimCatagory() {
         // Reset facehugger exposure if not medical
         if (newCategory !== 'Medical') {
             setFacehuggerExposure(false);
+        }
+
+        // Reset travel fields if not travel
+        if (newCategory !== 'Travel') {
+            setDestination('');
+            setReturnTrip('');
         }
     };
 
@@ -46,13 +54,13 @@ export default function ClaimCatagory() {
                         <select value={selectedCategory} onChange={handleCategoryChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Select a category</option>
                             <option value="Food">Food</option>
-                            <option value="Travel">Travel</option>
                             <option value="Lodging">Lodging</option>
+                            <option value="Travel">Travel</option>
                             <option value="Medical">Medical</option>
                         </select>
                     </div>
 
-                    {/* Special Category checkbox */}
+                    {/* Medical Category checkbox */}
                     {selectedCategory === 'Medical' && (
                         <div className="mb-4">
                             <label className="flex items-center gap-2 cursor-pointer">
@@ -67,6 +75,32 @@ export default function ClaimCatagory() {
                         </div>
                     )}
 
+                    {/* Travel Category fields */}
+                    {selectedCategory === 'Travel' && (
+                        <div className="mb-4 space-y-4">
+                            <div>
+                                <label className="block font-semibold mb-2">Where are you traveling from?</label>
+                                <input
+                                    type="text"
+                                    value={destination}
+                                    onChange={(e) => setDestination(e.target.value)}
+                                    placeholder="Enter Address"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block font-semibold mb-2">Where are you traveling to?</label>
+                                <input
+                                    type="text"
+                                    value={returnTrip}
+                                    onChange={(e) => setReturnTrip(e.target.value)}
+                                    placeholder="Enter Address"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     {/* Claim Description */}
                     <div className="mb-4">
                         <label className="block font-semibold mb-2">Claim Description</label>
@@ -74,16 +108,16 @@ export default function ClaimCatagory() {
                     </div>
 
                     <div className="flex justify-between items-center mt-6">
-                        <Link href="/employee/claim-submit">
-                            <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
+                        <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
+                            <Link href="/employee/claim-dashboard">
                                 Back
-                            </button>
-                        </Link>
-                        <Link href="/employee/claim-success">
-                            <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                            </Link>
+                        </button>
+                        <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                            <Link href="/employee/claim-success">
                                 Submit
-                            </button>
-                        </Link>
+                            </Link>
+                        </button>
                     </div>
                 </div>
             </div>
