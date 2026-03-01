@@ -25,9 +25,12 @@ export default function UsersPage({ Users }: { Users: any[] }) {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
-                <button className="bg-blue-600 text-white px-4 py-2 rounded">
-                    + Add User
-                </button>
+                <Link href="/admin/dashboard/users/add">
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded">
+                        + Add User
+                    </button>
+                </Link>
+
             </div>
 
             <div className="bg-white rounded-lg shadow overflow-hidden">

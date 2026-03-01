@@ -66,6 +66,14 @@ export async function addUser(request: NextRequest) {
         const lastName = sanitizeHtml(body.lastName);
         const email = sanitizeHtml(body.email);
         const password = sanitizeHtml(body.password);
+        const DOB = sanitizeHtml(body.dob);
+        const address = {
+            street: sanitizeHtml(body.street),
+            city: sanitizeHtml(body.city),
+            province: sanitizeHtml(body.province),
+            postalCode: sanitizeHtml(body.postalCode),
+            country: sanitizeHtml(body.country)
+        };
 
         // hash password
         const passwordHash = await bcrypt.hash(password, 10);
@@ -73,14 +81,25 @@ export async function addUser(request: NextRequest) {
         const db = mongoClient.db(MONGO_DB_NAME);
         const users = db.collection("users");
 
+        const existingUser = await users.findOne({ email });
+        if (existingUser) {
+            return NextResponse.json(
+                { error: "User already exists" },
+                { status: 400 }
+            );
+        }
+
         const result = await users.insertOne({
             firstName,
             lastName,
             email,
+            DOB: new Date(DOB),
+            address,
             passwordHash,
             role: "EMPLOYEE",
             createdAt: new Date()
         });
+
 
         if (!result.insertedId) {
             return NextResponse.json({ success: false }, { status: 400 });

@@ -1,5 +1,5 @@
 import { getUsers } from '@/tools/DataManager';
-import Userpage from "./userPage";
+import Userpage from "@/components/userPage";
 
 
 
