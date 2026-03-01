@@ -1,6 +1,5 @@
-// import Login from './employee/Login';
-// import EmployeeClaimForm from './employee-claim-form/page';
-import AddUser from './admin/add-user/addUser';
+
+import AddUser from './admin/dashboard/users/add/page';
 import ClaimCategory from './employee/claim-category/page';
 import EmployeeClaimForm from './employee/claim-dashboard/page';
 import EmployeeClaimSubmit from './employee/claim-submit/page';

@@ -27,6 +27,7 @@
     "@types/react-dom": "^19",
     "@types/sanitize-html": "^2.16.0",
     "eslint": "^8.57.1",
+    "react-spinners": "^0.17.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

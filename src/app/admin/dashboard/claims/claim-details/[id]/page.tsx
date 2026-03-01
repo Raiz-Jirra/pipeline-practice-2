@@ -11,8 +11,6 @@ export default async function page() {
     return (
         <>
             <ClaimDetails claims={claims} />
-
-
         </>
     );
 }
