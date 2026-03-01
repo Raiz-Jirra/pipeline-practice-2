@@ -166,7 +166,6 @@ export async function getAdminClaims() {
             }
         ]).toArray();
 
-        console.log(claims);
         return claims.map((claim) => ({
             _id: claim._id.toString(),
             claimId: claim.claimId,
@@ -232,12 +231,9 @@ export async function deleteUser(request: NextRequest, id: string) {
 
         const result = await users.deleteOne({ "_id": userId })
 
-
-        // check if deleted correctly
         if (result.deletedCount <= 0) {
             return NextResponse.json({ error: "No user found with ID" }, { status: 404 });
         } else {
-            // status code for deleted
             return NextResponse.json(result, { status: 200 });
         }
     } catch (error: any) {
@@ -247,5 +243,114 @@ export async function deleteUser(request: NextRequest, id: string) {
     }
 }
 
+
+
+export async function addCategory(request: NextRequest) {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+        const body = await request.json();
+
+        const rawName = body.name;
+
+        const categoryName = sanitizeHtml(rawName.trim());
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const collection = db.collection("claimCategories");
+
+        const existing = await collection.findOne({ key: categoryName.toUpperCase() });
+
+        if (existing) {
+            return NextResponse.json({ error: "Category already exists" }, { status: 400 }
+            );
+        }
+
+        await collection.insertOne({ key: categoryName.toUpperCase(), label: categoryName, isDefault: false, createdAt: new Date() });
+
+        return NextResponse.json({ success: true }, { status: 200 });
+
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    } finally {
+        await mongoClient.close();
+    }
+}
+
+
+export async function getCategories() {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const collection = db.collection("claimCategories");
+
+        const categories = await collection
+            .find({})
+            .sort({ isDefault: -1, label: 1 })
+            .toArray();
+
+        return categories.map(category => ({
+            id: category._id.toString(),
+            key: category.key,
+            label: category.label,
+            isDefault: category.isDefault ?? false,
+            date: category.createdAt.toISOString().split('T')[0]
+        }));
+
+    } catch (error: any) {
+        console.error("Error fetching categories:", error.message);
+        throw error;
+    } finally {
+        await mongoClient.close();
+    }
+}
+
+export async function deleteCategory(request: NextRequest, id: string) {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+        const db = mongoClient.db(MONGO_DB_NAME);
+
+        const categories = db.collection("claimCategories");
+        const claims = db.collection("claims");
+
+        const category = await categories.findOne({
+            _id: new ObjectId(id)
+        });
+
+        if (!category) {
+            return NextResponse.json({ error: "Category not found" }, { status: 404 });
+        }
+
+        if (category.isDefault) {
+            return NextResponse.json({ error: "Default categories cannot be deleted" }, { status: 400 }
+            );
+        }
+
+        const claimExists = await claims.findOne({ category: category.key });
+
+        if (claimExists) {
+            return NextResponse.json(
+                { error: "Category is in use by existing claims and cannot be deleted" },
+                { status: 400 }
+            );
+        }
+
+        await categories.deleteOne({ _id: category._id });
+
+        return NextResponse.json({ success: true }, { status: 200 }
+        );
+
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 }
+        );
+    } finally {
+        await mongoClient.close();
+    }
+}
 
 
