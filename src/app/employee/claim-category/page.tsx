@@ -156,8 +156,8 @@ export default function ClaimCatagory() {
                                 <label className="block font-semibold mb-2">Where are you traveling to?</label>
                                 <input
                                     type="text"
-                                    value={claimDescription}
-                                    onChange={(e) => setClaimDescription(e.target.value)}
+                                    value={destination}
+                                    onChange={(e) => setDestination(e.target.value)}
                                     placeholder="Enter Address"
                                     className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
