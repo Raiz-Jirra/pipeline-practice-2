@@ -297,7 +297,7 @@ export async function getCategories() {
             key: category.key,
             label: category.label,
             isDefault: category.isDefault ?? false,
-            date: category.createdAt.toISOString().split('T')[0]
+            date: category.createdAt ? category.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
         }));
 
     } catch (error: any) {
