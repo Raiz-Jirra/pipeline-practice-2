@@ -260,12 +260,14 @@ export default function ClaimCatagory() {
                         <input
                             type="number"
                             step="0.01"
-                            min="0"
-                            value={claimAmount}
+                            min="0.01"
+                            value={claimAmount || ''}
                             onChange={(e) => setClaimAmount(parseFloat(e.target.value) || 0)}
-                            placeholder="Enter claim amount"
+                            placeholder="0.00"
+                            required
                             className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        <p className="text-sm text-gray-500 mt-1">Enter the total amount in dollars (e.g., 150.00)</p>
                     </div>
 
                     {/* Receipt Upload */}
