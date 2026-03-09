@@ -17,12 +17,12 @@ export default function EmployeeClaimForm() {
     const [claims, setClaims] = useState<Claim[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [userName, setUserName] = useState<string>('');
+    const [firstName, setFirstName] = useState<string>('User');
+    const [lastName, setLastName] = useState<string>('User');
     const router = useRouter();
 
-    // Fetch claims on component mount
     useEffect(() => {
-        const fetchClaims = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true);
 
@@ -33,23 +33,39 @@ export default function EmployeeClaimForm() {
                     return;
                 }
 
-                // Fetch user-specific claims
-                const response = await fetch(`/api/employee/claims?userId=${userId}`);
-                const data = await response.json();
+                // Fetch user profile and claims in parallel
+                const [profileResponse, claimsResponse] = await Promise.all([
+                    fetch(`/api/employee/profile?userId=${userId}`),
+                    fetch(`/api/employee/claims?userId=${userId}`)
+                ]);
 
-                if (data.success) {
-                    setClaims(data.claims);
+                const profileData = await profileResponse.json();
+                const claimsData = await claimsResponse.json();
+
+                // Set first name
+                if (profileData.success) {
+                    setFirstName(profileData.profile.firstName);
+                }
+
+                // Set last name
+                if (profileData.success) {
+                    setLastName(profileData.profile.lastName);
+                }
+
+                // Set claims
+                if (claimsData.success) {
+                    setClaims(claimsData.claims);
                 } else {
                     setError('Failed to load claims');
                 }
             } catch (err) {
-                setError('Error fetching claims');
+                setError('Error fetching data');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchClaims();
+        fetchData();
     }, [router]);
 
     const getStatusColor = (status: string) => {
@@ -99,7 +115,7 @@ export default function EmployeeClaimForm() {
                 </div>
             </header>
             <div className="mb-6">
-                <h1 className="text-3xl font-bold mb-2">Hello, User!</h1>
+                <h1 className="text-3xl font-bold mb-2">Hello, {firstName} {lastName}!</h1>
                 <p className="text-gray-600">View your claim status and history</p>
             </div>
 

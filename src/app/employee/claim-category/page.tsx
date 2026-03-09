@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Category {
     key: string;
@@ -17,7 +18,10 @@ export default function ClaimCatagory() {
     const [receiptImages, setReceiptImages] = useState<File[]>([]);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [claimDescription, setClaimDescription] = useState('');
+    const [claimAmount, setClaimAmount] = useState<number>(0);
+    const [submitting, setSubmitting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -94,9 +98,10 @@ export default function ClaimCatagory() {
     // Validate form
     const isFormValid = () => {
         // Check the required fields
-        if (!selectedCategory || !claimDescription || !receiptImages.length) {
+        if (!selectedCategory || !claimDescription || !receiptImages.length || claimAmount <= 0) {
             return false;
         }
+
 
         // Check TRAVEL fields
         if (selectedCategory === 'TRAVEL' && (!destination || !returnTrip)) {
@@ -104,6 +109,61 @@ export default function ClaimCatagory() {
         }
 
         return true;
+    }
+
+    // Handle claim submission
+    const handleSubmit = async () => {
+        if (!isFormValid() || submitting) return;
+
+        setSubmitting(true);
+
+        try {
+            // Get userId from localStorage
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert('Please log in to submit a claim');
+                router.push('/employee/login');
+                return;
+            }
+
+            // Build claim data object
+            const claimData = {
+                employeeId: userId,
+                category: selectedCategory,
+                description: claimDescription,
+                amount: claimAmount,
+                receipts: receiptImages.map(file => file.name),
+                travelDetails: selectedCategory === 'TRAVEL' ? {
+                    startLocation: returnTrip,
+                    endLocation: destination,
+                    estimatedMileage: 0
+                } : null,
+                medicalDetails: selectedCategory === 'MEDICAL' ? {
+                    specialExposure: facehuggerExposure
+                } : null
+            };
+
+            // Submit to API
+            const response = await fetch('/api/employee/submitClaim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(claimData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Success! Navigate to success page
+                router.push('/employee/claim-success');
+            } else {
+                alert(`Failed to submit claim: ${result.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error submitting claim:', error);
+            alert('Error submitting claim. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (
@@ -194,6 +254,19 @@ export default function ClaimCatagory() {
                         />
                     </div>
 
+                    {/* Claim Amount */}
+                    <div className="mb-4">
+                        <label className="block font-semibold mb-2">Claim Amount ($)</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={claimAmount}
+                            onChange={(e) => setClaimAmount(parseFloat(e.target.value) || 0)}
+                            placeholder="Enter claim amount"
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
 
                     {/* Receipt Upload */}
                     <div className="mb-4">
@@ -247,20 +320,19 @@ export default function ClaimCatagory() {
 
                         <div className="flex justify-between items-center mt-6">
                             <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
-                                <Link href="/employee/claim-submit">
+                                <Link href="/employee/claim-dashboard">
                                     Back
                                 </Link>
                             </button>
                             <button
-                                disabled={!isFormValid()}
-                                className={`px-6 py-3 rounded-lg transition-colors font-semibold ${isFormValid()
+                                onClick={handleSubmit}
+                                disabled={!isFormValid() || submitting}
+                                className={`px-6 py-3 rounded-lg transition-colors font-semibold ${isFormValid() && !submitting
                                     ? 'bg-blue-500 text-white hover:bg-blue-700'
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     }`}
                             >
-                                <Link href="/employee/claim-success">
-                                    Submit
-                                </Link>
+                                {submitting ? 'Submitting...' : 'Submit'}
                             </button>
                         </div>
 

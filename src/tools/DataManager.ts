@@ -429,4 +429,93 @@ export async function createClaim(request: NextRequest) {
     }
 }
 
+export async function updateUserProfile(request: NextRequest) {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+
+        // Get data from request body
+        const body = await request.json();
+
+        // Sanitize inputs 
+        const userId = sanitizeHtml(body.userId);
+        const phoneNumber = sanitizeHtml(body.phoneNumber);
+        const wyId = sanitizeHtml(body.wyId);
+
+        // Validation: all fields required
+        if (!userId || !phoneNumber || !wyId) {
+            return NextResponse.json(
+                { error: "Missing required fields" },
+                { status: 400 }
+            );
+        }
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const users = db.collection("users");
+
+        // Update the user document
+        const result = await users.updateOne(
+            { _id: new ObjectId(userId) },
+            {
+                $set: {
+                    phoneNumber,
+                    wyId
+                }
+            }
+        );
+
+        // Check if user was found
+        if (result.matchedCount === 0) {
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 404 }
+            );
+        }
+
+        // Success!
+        return NextResponse.json({
+            success: true
+        });
+
+    } catch (error: any) {
+        return NextResponse.json(
+            { error: error.message },
+            { status: 500 }
+        );
+    } finally {
+        await mongoClient.close();
+    }
+}
+
+export async function getUserProfile(userId: string) {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const users = db.collection("users");
+
+        // Find user by _id
+        const user = await users.findOne({ _id: new ObjectId(userId) });
+
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        // Return formatted user data
+        return {
+            id: user._id.toString(),
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            phoneNumber: user.phoneNumber || "",
+            wyId: user.wyId || "",
+            role: user.role
+        };
+    } finally {
+        await mongoClient.close();
+    }
+}
+
 
