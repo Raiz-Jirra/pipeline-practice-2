@@ -32,7 +32,7 @@ export default function Login() {
 
         const userId = result.data.userId;
 
-        console.log('Login successful! userId:', userId, 'role:', role);
+
 
         localStorage.setItem('userId', userId);
         localStorage.setItem('userRole', role);

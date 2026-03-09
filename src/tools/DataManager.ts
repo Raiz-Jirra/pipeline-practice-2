@@ -353,4 +353,79 @@ export async function deleteCategory(request: NextRequest, id: string) {
     }
 }
 
+export async function createClaim(request: NextRequest) {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+        const body = await request.json();
+
+        // Sanitize inputs
+        const employeeId = new ObjectId(sanitizeHtml(body.employeeId));
+        const category = sanitizeHtml(body.category);
+        const description = sanitizeHtml(body.description);
+        const amount = parseFloat(sanitizeHtml(body.amount.toString()));
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const claims = db.collection("claims");
+
+        // Generate unique claim ID
+        const claimCount = await claims.countDocuments();
+        const claimId = `CLM-${String(claimCount + 1).padStart(3, '0')}`;
+
+        // Build claim object
+        const newClaim: any = {
+            claimId,
+            employeeId,
+            date: new Date(),
+            category,
+            description,
+            amount,
+            receipts: body.receipts || [],
+            status: "PENDING",
+            createdAt: new Date()
+        };
+
+        // Add category-specific details
+        if (category === "TRAVEL" && body.travelDetails) {
+            newClaim.travelDetails = {
+                startLocation: sanitizeHtml(body.travelDetails.startLocation),
+                endLocation: sanitizeHtml(body.travelDetails.endLocation),
+                estimatedMileage: body.travelDetails.estimatedMileage || 0
+            };
+            newClaim.medicalDetails = null;
+        } else if (category === "MEDICAL" && body.medicalDetails) {
+            newClaim.medicalDetails = {
+                specialExposure: body.medicalDetails.specialExposure || false
+            };
+            newClaim.travelDetails = null;
+        } else {
+            newClaim.travelDetails = null;
+            newClaim.medicalDetails = null;
+        }
+
+        const result = await claims.insertOne(newClaim);
+
+        if (!result.insertedId) {
+            return NextResponse.json(
+                { success: false, error: "Failed to create claim" },
+                { status: 400 }
+            );
+        }
+
+        return NextResponse.json({
+            success: true,
+            claimId: newClaim.claimId
+        });
+
+    } catch (error: any) {
+        return NextResponse.json(
+            { error: error.message },
+            { status: 500 }
+        );
+    } finally {
+        await mongoClient.close();
+    }
+}
+
 
