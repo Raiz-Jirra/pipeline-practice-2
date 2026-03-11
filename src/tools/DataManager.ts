@@ -1,15 +1,17 @@
-
 import bcrypt from "bcrypt";
 import { MongoClient, ObjectId } from "mongodb";
 import sanitizeHtml from 'sanitize-html';
 import { NextRequest, NextResponse } from 'next/server';
+
+
+/* ---------------------------------------------DATABASE CONFIGURATION*/
 
 // MongoDB constants
 const MONGO_URL: string = process.env.MONGO_URL || "mongodb://mongo:27017";
 const MONGO_DB_NAME: string = "dbData";
 
 
-// ------login and registration handlers------
+/* ---------------------------------------------AUTHENTICATION */
 export async function loginUser(request: NextRequest) {
     const mongoClient = new MongoClient(MONGO_URL);
 
@@ -19,7 +21,6 @@ export async function loginUser(request: NextRequest) {
         const body = await request.json();
         body.email = sanitizeHtml(body.email);
         body.password = sanitizeHtml(body.password);
-
 
         const email = body.email;
         const password = body.password;
@@ -67,6 +68,7 @@ export async function addUser(request: NextRequest) {
         const email = sanitizeHtml(body.email);
         const password = sanitizeHtml(body.password);
         const DOB = sanitizeHtml(body.dob);
+
         const address = {
             street: sanitizeHtml(body.street),
             city: sanitizeHtml(body.city),
@@ -82,6 +84,7 @@ export async function addUser(request: NextRequest) {
         const users = db.collection("users");
 
         const existingUser = await users.findOne({ email });
+
         if (existingUser) {
             return NextResponse.json(
                 { error: "User already exists" },
@@ -100,7 +103,6 @@ export async function addUser(request: NextRequest) {
             createdAt: new Date()
         });
 
-
         if (!result.insertedId) {
             return NextResponse.json({ success: false }, { status: 400 });
         }
@@ -109,15 +111,19 @@ export async function addUser(request: NextRequest) {
 
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });
+
     } finally {
         await mongoClient.close();
     }
 }
 
-// ------read handlers------
+
+
+/* --------------------------------------------------------USER MANAGEMENT */
 export async function getUsers() {
     let mongoClient: MongoClient = new MongoClient(MONGO_URL);
     let allUsers: any[];
+
     try {
         await mongoClient.connect();
 
@@ -138,20 +144,55 @@ export async function getUsers() {
     } catch (error: any) {
         console.log(`Error : ${error.message}`);
         throw error;
+
     } finally {
         await mongoClient.close();
     }
-
 }
+
+
+export async function deleteUser(request: NextRequest, id: string) {
+    let mongoClient: MongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+
+        const userId: ObjectId = new ObjectId(sanitizeHtml(id));
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const users = db.collection("users");
+
+        const result = await users.deleteOne({ "_id": userId });
+
+        if (result.deletedCount <= 0) {
+            return NextResponse.json(
+                { error: "No user found with ID" },
+                { status: 404 }
+            );
+        } else {
+            return NextResponse.json(result, { status: 200 });
+        }
+
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+
+    } finally {
+        mongoClient.close();
+    }
+}
+
+
+
+/* -------------------------------------------------------------CLAIMS*/
 
 export async function getAdminClaims() {
     let mongoClient: MongoClient = new MongoClient(MONGO_URL);
     let claims: any[];
+
     try {
         await mongoClient.connect();
 
         const db = mongoClient.db(MONGO_DB_NAME);
-
 
         claims = await db.collection("claims").aggregate([
             {
@@ -161,7 +202,8 @@ export async function getAdminClaims() {
                     foreignField: "_id",
                     as: "employee"
                 }
-            }, {
+            },
+            {
                 $unwind: "$employee"
             }
         ]).toArray();
@@ -179,14 +221,15 @@ export async function getAdminClaims() {
             lastName: claim.employee.lastName
         }));
 
-
     } catch (error: any) {
         console.log(`Error : ${error.message}`);
         throw error;
+
     } finally {
         mongoClient.close();
     }
 }
+
 
 // Show cliams table for enployees -- Robert Jones
 export async function getEmployeeClaims(userId?: string) {
@@ -214,37 +257,15 @@ export async function getEmployeeClaims(userId?: string) {
 
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
+
     } finally {
         await mongoClient.close();
     }
-
-}
-
-export async function deleteUser(request: NextRequest, id: string) {
-    let mongoClient: MongoClient = new MongoClient(MONGO_URL);
-    try {
-        await mongoClient.connect();
-
-        const userId: ObjectId = new ObjectId(sanitizeHtml(id));
-
-        const db = mongoClient.db(MONGO_DB_NAME);
-        const users = db.collection("users");
-
-        const result = await users.deleteOne({ "_id": userId })
-
-        if (result.deletedCount <= 0) {
-            return NextResponse.json({ error: "No user found with ID" }, { status: 404 });
-        } else {
-            return NextResponse.json(result, { status: 200 });
-        }
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    } finally {
-        mongoClient.close();
-    }
 }
 
 
+
+/* ----------------------------------------------------------CATEGORY MANAGEMENT*/
 
 export async function addCategory(request: NextRequest) {
     const mongoClient = new MongoClient(MONGO_URL);
@@ -254,7 +275,6 @@ export async function addCategory(request: NextRequest) {
         const body = await request.json();
 
         const rawName = body.name;
-
         const categoryName = sanitizeHtml(rawName.trim());
 
         const db = mongoClient.db(MONGO_DB_NAME);
@@ -263,16 +283,24 @@ export async function addCategory(request: NextRequest) {
         const existing = await collection.findOne({ key: categoryName.toUpperCase() });
 
         if (existing) {
-            return NextResponse.json({ error: "Category already exists" }, { status: 400 }
+            return NextResponse.json(
+                { error: "Category already exists" },
+                { status: 400 }
             );
         }
 
-        await collection.insertOne({ key: categoryName.toUpperCase(), label: categoryName, isDefault: false, createdAt: new Date() });
+        await collection.insertOne({
+            key: categoryName.toUpperCase(),
+            label: categoryName,
+            isDefault: false,
+            createdAt: new Date()
+        });
 
         return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
+
     } finally {
         await mongoClient.close();
     }
@@ -298,16 +326,20 @@ export async function getCategories() {
             key: category.key,
             label: category.label,
             isDefault: category.isDefault ?? false,
-            date: category.createdAt ? category.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+            date: category.createdAt
+                ? category.createdAt.toISOString().split('T')[0]
+                : new Date().toISOString().split('T')[0]
         }));
 
     } catch (error: any) {
         console.error("Error fetching categories:", error.message);
         throw error;
+
     } finally {
         await mongoClient.close();
     }
 }
+
 
 export async function deleteCategory(request: NextRequest, id: string) {
     const mongoClient = new MongoClient(MONGO_URL);
@@ -328,7 +360,9 @@ export async function deleteCategory(request: NextRequest, id: string) {
         }
 
         if (category.isDefault) {
-            return NextResponse.json({ error: "Default categories cannot be deleted" }, { status: 400 }
+            return NextResponse.json(
+                { error: "Default categories cannot be deleted" },
+                { status: 400 }
             );
         }
 
@@ -343,16 +377,19 @@ export async function deleteCategory(request: NextRequest, id: string) {
 
         await categories.deleteOne({ _id: category._id });
 
-        return NextResponse.json({ success: true }, { status: 200 }
-        );
+        return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 }
-        );
+        return NextResponse.json({ error: error.message }, { status: 500 });
+
     } finally {
         await mongoClient.close();
     }
 }
+
+
+
+/* --------------------------------------------------------CLAIM CREATION*/
 
 export async function createClaim(request: NextRequest) {
     const mongoClient = new MongoClient(MONGO_URL);
@@ -395,11 +432,13 @@ export async function createClaim(request: NextRequest) {
                 estimatedMileage: body.travelDetails.estimatedMileage || 0
             };
             newClaim.medicalDetails = null;
+
         } else if (category === "MEDICAL" && body.medicalDetails) {
             newClaim.medicalDetails = {
                 specialExposure: body.medicalDetails.specialExposure || false
             };
             newClaim.travelDetails = null;
+
         } else {
             newClaim.travelDetails = null;
             newClaim.medicalDetails = null;
@@ -424,10 +463,15 @@ export async function createClaim(request: NextRequest) {
             { error: error.message },
             { status: 500 }
         );
+
     } finally {
         await mongoClient.close();
     }
 }
+
+
+
+/* -----------------------------------------------------------USER PROFILE*/
 
 export async function updateUserProfile(request: NextRequest) {
     const mongoClient = new MongoClient(MONGO_URL);
@@ -435,15 +479,12 @@ export async function updateUserProfile(request: NextRequest) {
     try {
         await mongoClient.connect();
 
-        // Get data from request body
         const body = await request.json();
 
-        // Sanitize inputs 
         const userId = sanitizeHtml(body.userId);
         const phoneNumber = sanitizeHtml(body.phoneNumber);
         const wyId = sanitizeHtml(body.wyId);
 
-        // Validation: all fields required
         if (!userId || !phoneNumber || !wyId) {
             return NextResponse.json(
                 { error: "Missing required fields" },
@@ -454,7 +495,6 @@ export async function updateUserProfile(request: NextRequest) {
         const db = mongoClient.db(MONGO_DB_NAME);
         const users = db.collection("users");
 
-        // Update the user document
         const result = await users.updateOne(
             { _id: new ObjectId(userId) },
             {
@@ -465,7 +505,6 @@ export async function updateUserProfile(request: NextRequest) {
             }
         );
 
-        // Check if user was found
         if (result.matchedCount === 0) {
             return NextResponse.json(
                 { error: "User not found" },
@@ -473,20 +512,19 @@ export async function updateUserProfile(request: NextRequest) {
             );
         }
 
-        // Success!
-        return NextResponse.json({
-            success: true
-        });
+        return NextResponse.json({ success: true });
 
     } catch (error: any) {
         return NextResponse.json(
             { error: error.message },
             { status: 500 }
         );
+
     } finally {
         await mongoClient.close();
     }
 }
+
 
 export async function getUserProfile(userId: string) {
     const mongoClient = new MongoClient(MONGO_URL);
@@ -496,14 +534,12 @@ export async function getUserProfile(userId: string) {
         const db = mongoClient.db(MONGO_DB_NAME);
         const users = db.collection("users");
 
-        // Find user by _id
         const user = await users.findOne({ _id: new ObjectId(userId) });
 
         if (!user) {
             throw new Error("User not found");
         }
 
-        // Return formatted user data
         return {
             id: user._id.toString(),
             firstName: user.firstName,
@@ -513,9 +549,8 @@ export async function getUserProfile(userId: string) {
             wyId: user.wyId || "",
             role: user.role
         };
+
     } finally {
         await mongoClient.close();
     }
 }
-
-
