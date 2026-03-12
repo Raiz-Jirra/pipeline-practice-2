@@ -554,3 +554,44 @@ export async function getUserProfile(userId: string) {
         await mongoClient.close();
     }
 }
+
+/* ------------------------------------------------------REPORTS*/
+
+export async function getClaimCounts() {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const claims = db.collection("claims");
+
+        const total: any = await claims.countDocuments();
+
+        const approved: any = await claims.countDocuments({
+            status: "APPROVED"
+        });
+
+        const rejected: any = await claims.countDocuments({
+            status: "REJECTED"
+        });
+
+        const pending: any = await claims.countDocuments({
+            status: "PENDING"
+        });
+
+        return {
+            total,
+            approved,
+            rejected,
+            pending
+        };
+
+    } catch (error: any) {
+        console.log(`Error : ${error.message}`);
+        throw error;
+
+    } finally {
+        await mongoClient.close();
+    }
+}
