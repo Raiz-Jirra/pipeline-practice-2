@@ -519,7 +519,6 @@ export async function updateUserProfile(request: NextRequest) {
             { error: error.message },
             { status: 500 }
         );
-
     } finally {
         await mongoClient.close();
     }
@@ -634,6 +633,51 @@ export async function getClaimsByCategory(start?: string, end?: string) {
             count: r.count
         }));
 
+    } finally {
+        await mongoClient.close();
+    }
+}
+
+export async function updateStatus(request: NextRequest, id: string) {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+
+        const body = await request.json();
+
+        const sanitizedId = sanitizeHtml(id);
+        const sanitizedStatus = sanitizeHtml(body.status);
+
+        if (!["APPROVED", "REJECTED"].includes(sanitizedStatus)) {
+            return NextResponse.json(
+                { error: "Invalid status value" },
+                { status: 400 }
+            );
+        }
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const claims = db.collection("claims");
+
+        const result = await claims.updateOne(
+            { claimId: sanitizedId },
+            { $set: { status: sanitizedStatus } }
+        );
+
+        if (result.matchedCount === 0) {
+            return NextResponse.json(
+                { error: "Claim not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({ success: true });
+
+    } catch (error: any) {
+        return NextResponse.json(
+            { error: error.message },
+            { status: 500 }
+        );
     } finally {
         await mongoClient.close();
     }
