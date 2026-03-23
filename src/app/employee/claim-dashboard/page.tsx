@@ -81,6 +81,12 @@ export default function EmployeeClaimForm() {
         }
     };
 
+    // Handle logout by clearing user session and redirecting to login page
+    const handleLogout = () => {
+        localStorage.removeItem('userId');
+        router.push('/employee/login');
+    };
+
     // Loading state
     if (loading) {
         return (
@@ -107,17 +113,21 @@ export default function EmployeeClaimForm() {
         <div className="container mx-auto p-6 max-w-6xl">
             {/* Header */}
             <header>
-                <div className="flex items-center gap-4 mb-6">
-                    <img src="/images/weyyuLogo.png" alt="Company Logo" width={150} height={150} />
-                    <div className="text-3xl font-bold">
-                        Welcome to Weyland-Yutani's Employee Claims Service
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                        <img src="/images/weyyuLogo.png" alt="Company Logo" width={150} height={150} />
+                        <div className="text-3xl font-bold">
+                            Welcome to Weyland-Yutani's Employee Claims Service
+                        </div>
                     </div>
+                    <button
+                        onClick={handleLogout}
+                        className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+                    >
+                        Log Out
+                    </button>
                 </div>
             </header>
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold mb-2">Hello, {firstName} {lastName}!</h1>
-                <p className="text-gray-600">View your claim status and history</p>
-            </div>
 
             {/* Claim Status & History Section */}
             <div className="bg-white rounded-lg shadow p-6">

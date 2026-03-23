@@ -18,6 +18,22 @@ export default function EmployeeClaimSubmit() {
         }
     }, [router]);
 
+    // Fetch user profile on component mount to pre-fill WY ID and phone number
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                const response = await fetch(`/api/employee/profile?userId=${userId}`);
+                const data = await response.json();
+                if (data.success && data.profile) {
+                    setWyId(data.profile.wyId);
+                    setPhoneNumber(data.profile.phoneNumber);
+                }
+            }
+        };
+        fetchProfile();
+    }, []);
+
     const isFormValid = () => {
         return wyId.trim() !== '' && phoneNumber.trim() !== '';
     };

@@ -16,6 +16,8 @@ db.users.insert([
     firstName: "Admin",
     lastName: "User",
     email: "admin@test.com",
+    phoneNumber: "990-312-4829",
+    wyId: "WY-0001",
     passwordHash: "$2b$10$xXjv0Wldd2fDBX.Ezo2UnOgcWmLhtRnmILetJGBdnLR/OEpmm4Uoa",
     role: "ADMIN",
     createdAt: new Date()
@@ -25,6 +27,8 @@ db.users.insert([
     firstName: "Ellen",
     lastName: "Ripley",
     email: "ellen.ripley@test.com",
+    phoneNumber: "941-343-4639",
+    wyId: "WY-0002",
     DOB: new Date("1998-04-21"),
     address: {
       street: "123 Rue Montier",
@@ -42,6 +46,8 @@ db.users.insert([
     firstName: "Chris",
     lastName: "Baron",
     email: "chris123@test.com",
+    phoneNumber: "903-365-9745",
+    wyId: "WY-0003",
     DOB: new Date("2001-03-21"),
     address: {
       street: "47 Oxford Street",
@@ -59,6 +65,8 @@ db.users.insert([
     firstName: "Sarah",
     lastName: "Connor",
     email: "sarah.connor@test.com",
+    phoneNumber: "213-943-3682",
+    wyId: "WY-0004",
     DOB: new Date("1995-08-12"),
     address: {
       street: "15 King Street",
@@ -76,6 +84,8 @@ db.users.insert([
     firstName: "James",
     lastName: "Carter",
     email: "james.carter@test.com",
+    phoneNumber: "488-293-0382",
+    wyId: "WY-0005",
     DOB: new Date("1990-11-05"),
     address: {
       street: "88 Elm Street",
@@ -93,6 +103,8 @@ db.users.insert([
     firstName: "Maria",
     lastName: "Lopez",
     email: "maria.lopez@test.com",
+    phoneNumber: "928-462-6931",
+    wyId: "WY-0006",
     DOB: new Date("1997-02-18"),
     address: {
       street: "22 Lakeshore Blvd",
@@ -110,6 +122,8 @@ db.users.insert([
     firstName: "Daniel",
     lastName: "Smith",
     email: "daniel.smith@test.com",
+    phoneNumber: "928-820-2983",
+    wyId: "WY-0007",
     DOB: new Date("1993-06-30"),
     address: {
       street: "101 Main Street",
