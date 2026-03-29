@@ -1,9 +1,34 @@
+/**
+ * Employee Claim Dashboard Page
+ * 
+ * This page displays an employee's claim history and status.
+ * Features:
+ * - View all submitted claims in a table format
+ * - See claim status (approved, pending, rejected)
+ * - Create new claims via navigation
+ * - Logout functionality
+ * - Authentication check and redirect
+ * 
+ * @page /employee/claim-dashboard
+ * @requires User must be logged in with valid userId in localStorage
+ */
+
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-
+/**
+ * Claim data structure representing an employee's expense claim
+ * 
+ * @interface Claim
+ * @property {string | number} id - Unique identifier for the claim
+ * @property {string} date - Date the claim was submitted
+ * @property {string} category - Type/category of the expense claim
+ * @property {number} amount - Monetary amount of the claim
+ * @property {string} status - Current status: "approved", "pending", or "rejected"
+ * @property {string} description - Brief description of the claim
+ */
 interface Claim {
     id: string | number;
     date: string;
@@ -13,14 +38,42 @@ interface Claim {
     description: string;
 }
 
+/**
+ * EmployeeClaimForm Component
+ * 
+ * Main dashboard component for employees to view and manage their claims.
+ * Fetches user profile and claim data on mount, handles authentication,
+ * and provides UI for claim management.
+ * 
+ * @component
+ * @returns {JSX.Element} The employee claim dashboard page
+ */
 export default function EmployeeClaimForm() {
+    /** Array of all claims for the current user */
     const [claims, setClaims] = useState<Claim[]>([]);
+    /** Loading state indicator for data fetching */
     const [loading, setLoading] = useState(true);
+    /** Error message to display if data fetching fails */
     const [error, setError] = useState<string | null>(null);
+    /** User's first name, defaults to 'User' */
     const [firstName, setFirstName] = useState<string>('User');
+    /** User's last name, defaults to 'User' */
     const [lastName, setLastName] = useState<string>('User');
     const router = useRouter();
 
+    /**
+ * Data Fetching Effect
+ * 
+ * Runs on component mount to:
+ * 1. Check user authentication (redirect to login if not authenticated)
+ * 2. Fetch user profile data
+ * 3. Fetch user's claims data
+ * 
+ * Uses Promise.all for parallel data fetching to improve performance.
+ * 
+ * @effect
+ * @dependencies [router] - Re-runs if router instance changes
+ */
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -68,6 +121,16 @@ export default function EmployeeClaimForm() {
         fetchData();
     }, [router]);
 
+    /**
+     * Get Status Color
+     * 
+     * Returns Tailwind CSS classes for styling claim status badges
+     * based on the claim's current status.
+     * 
+     * @function getStatusColor
+     * @param {string} status - The claim status ("approved", "pending", "rejected")
+     * @returns {string} Tailwind CSS classes for background and text color
+     */
     const getStatusColor = (status: string) => {
         switch (status) {
             case "approved":
@@ -81,7 +144,15 @@ export default function EmployeeClaimForm() {
         }
     };
 
-    // Handle logout by clearing user session and redirecting to login page
+    /**
+     * Handle Logout
+     * 
+     * Clears user session data from localStorage and redirects
+     * to the employee login page.
+     * 
+     * @function handleLogout
+     * @returns {void}
+     */
     const handleLogout = () => {
         localStorage.removeItem('userId');
         router.push('/employee/login');
