@@ -152,7 +152,7 @@ export default function EmployeeClaimSubmit() {
     };
 
     return (
-        <>
+        <div>
             <div className="min-h-screen bg-gray-100">
                 {/* Header */}
                 <header className="bg-white shadow-sm border-b border-gray-200">
@@ -225,9 +225,7 @@ export default function EmployeeClaimSubmit() {
                             <button
                                 onClick={handleNext}
                                 disabled={!isFormValid() || submitting}
-                                className={`px-6 py-2.5 rounded-md transition font-medium ${isFormValid() && !submitting
-                                    ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                className={`px-6 py-2.5 rounded-md transition font-medium ${isFormValid() && !submitting ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     }`}
                             >
                                 {submitting ? 'Saving...' : 'Next'}
@@ -236,6 +234,6 @@ export default function EmployeeClaimSubmit() {
                     </div>
                 </main>
             </div>
-        </>
+        </div>
     );
 }

@@ -83,6 +83,21 @@ export default function ClaimCatagory() {
     const router = useRouter();
 
     /**
+     * Handle Logout
+     * 
+     * Clears user session data from localStorage and redirects
+     * to the employee login page.
+     * 
+     * @author Robert Jones
+     * @function handleLogout
+     * @returns {void}
+     */
+    const handleLogout = () => {
+        localStorage.removeItem('userId');
+        router.push('/employee/login');
+    };
+
+    /**
      * Categories Fetching Effect
      * 
      * Fetches available claim categories from API on component mount.
@@ -278,175 +293,189 @@ export default function ClaimCatagory() {
     }
 
     return (
-        <div className="container mx-auto p-6 max-w-6xl">
+        <div className="min-h-screen bg-gray-100">
             {/* Header */}
-            <header>
-                <div className="flex items-center gap-4 mb-6">
-                    <img src="/images/weyyuLogo.png" alt="Company Logo" width={150} height={150} />
-                    <div className="text-3xl font-bold">
-                        Welcome to Weyland-Yutani's Employee Claims Service
+            <header className="bg-white shadow-sm border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <img src="/images/weyyuLogo.png" alt="Company Logo" width={120} height={120} />
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900">Weyland-Yutani Corp</h1>
+                                <p className="text-sm text-gray-600">Employee Claims Service</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition font-medium"
+                        >
+                            Log Out
+                        </button>
                     </div>
                 </div>
             </header>
 
-            <div className="max-w-3xl mx-auto">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold mb-2">Submit Your Claim!</h1>
-                    <p className="text-gray-600">Please fill out the form below to submit a new claim</p>
-                </div>
-
-                {/* Claim Catagory */}
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold mb-6">Claim Information</h2>
-
-                    {/* Select Category */}
-                    <div className="mb-4">
-                        <label className="block font-semibold mb-2">Category</label>
-                        <select value={selectedCategory} onChange={handleCategoryChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select a category</option>
-                            {categories.map((category) => (
-                                <option key={category.key} value={category.key}>
-                                    {category.label}
-                                </option>
-                            ))}
-                        </select>
+            {/* Main Content */}
+            <main className="max-w-7xl mx-auto px-6 py-8">
+                <div className="max-w-3xl mx-auto">
+                    <div className="mb-6">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Submit Your Claim!</h2>
+                        <p className="text-gray-600">Please fill out the form below to submit a new claim</p>
                     </div>
 
-                    {/* Medical Category checkbox */}
-                    {selectedCategory === 'MEDICAL' && (
+                    {/* Claim Catagory */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h2 className="text-xl font-semibold mb-6">Claim Information</h2>
+
+                        {/* Select Category */}
                         <div className="mb-4">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    className="w-4 h-4"
-                                    checked={facehuggerExposure}
-                                    onChange={(e) => setFacehuggerExposure(e.target.checked)}
-                                />
-                                <span>Facehugger Exposure</span>
-                            </label>
+                            <label className="block font-semibold mb-2">Category</label>
+                            <select value={selectedCategory} onChange={handleCategoryChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select a category</option>
+                                {categories.map((category) => (
+                                    <option key={category.key} value={category.key}>
+                                        {category.label}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-                    )}
 
-                    {/* Travel Category fields */}
-                    {selectedCategory === 'TRAVEL' && (
-                        <div className="mb-4 space-y-4">
-                            <div>
-                                <label className="block font-semibold mb-2">Where are you traveling to?</label>
-                                <input
-                                    type="text"
-                                    value={destination}
-                                    onChange={(e) => setDestination(e.target.value)}
-                                    placeholder="Enter Address"
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
+                        {/* Medical Category checkbox */}
+                        {selectedCategory === 'MEDICAL' && (
+                            <div className="mb-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="w-4 h-4"
+                                        checked={facehuggerExposure}
+                                        onChange={(e) => setFacehuggerExposure(e.target.checked)}
+                                    />
+                                    <span>Facehugger Exposure</span>
+                                </label>
                             </div>
-                            <div>
-                                <label className="block font-semibold mb-2">Where are you traveling from?</label>
-                                <input
-                                    type="text"
-                                    value={returnTrip}
-                                    onChange={(e) => setReturnTrip(e.target.value)}
-                                    placeholder="Enter Address"
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Claim Description */}
-                    <div className="mb-4">
-                        <label className="block font-semibold mb-2">Claim Description</label>
-                        <textarea
-                            value={claimDescription}
-                            onChange={(e) => setClaimDescription(e.target.value)}
-                            placeholder="Enter description here"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            rows={5}
-                        />
-                    </div>
-
-                    {/* Claim Amount */}
-                    <div className="mb-4">
-                        <label className="block font-semibold mb-2">Claim Amount ($)</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            value={claimAmount || ''}
-                            onChange={(e) => setClaimAmount(parseFloat(e.target.value) || 0)}
-                            placeholder="0.00"
-                            required
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <p className="text-sm text-gray-500 mt-1">Enter the total amount in dollars (e.g., 150.00)</p>
-                    </div>
-
-                    {/* Receipt Upload */}
-                    <div className="mb-4">
-                        <label className="block font-semibold mb-2">Upload Receipt</label>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".jpg,.jpeg,.png"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                            multiple
-                        />
-                        <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-                        >
-                            {receiptImages.length > 0 ? `Add More (${receiptImages.length} selected)` : 'Choose Files'}
-                        </button>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Accepted formats: JPG, PNG. Max size: 5MB
-                        </p>
-
-                        {/* Image Preview */}
-                        {imagePreviews.length > 0 && (
-                            <div className="mt-4">
-                                <p className="text-sm font-semibold mb-2">Previews:</p>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    {imagePreviews.map((preview, index) => (
-                                        <div key={index} className="relative">
-                                            <img
-                                                src={preview}
-                                                alt={`Receipt preview ${index + 1}`}
-                                                className="w-full h-32 object-cover border border-gray-300 rounded-lg"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setReceiptImages(receiptImages.filter((_, i) => i !== index));
-                                                    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
-                                                }}
-                                                className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-800"
-                                            >
-                                            </button>
-                                        </div>
-                                    ))}
+                        {/* Travel Category fields */}
+                        {selectedCategory === 'TRAVEL' && (
+                            <div className="mb-4 space-y-4">
+                                <div>
+                                    <label className="block font-semibold mb-2">Where are you traveling to?</label>
+                                    <input
+                                        type="text"
+                                        value={destination}
+                                        onChange={(e) => setDestination(e.target.value)}
+                                        placeholder="Enter Address"
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block font-semibold mb-2">Where are you traveling from?</label>
+                                    <input
+                                        type="text"
+                                        value={returnTrip}
+                                        onChange={(e) => setReturnTrip(e.target.value)}
+                                        placeholder="Enter Address"
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
                             </div>
                         )}
 
-                        <div className="flex justify-between items-center mt-6">
-                            <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
-                                <Link href="/employee/claim-dashboard">
-                                    Back
-                                </Link>
-                            </button>
-                            <button
-                                onClick={handleSubmit}
-                                disabled={!isFormValid() || submitting}
-                                className={`px-6 py-3 rounded-lg transition-colors font-semibold ${isFormValid() && !submitting ? 'bg-blue-500 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>
-                                {submitting ? 'Submitting...' : 'Submit'}
-                            </button>
+                        {/* Claim Description */}
+                        <div className="mb-4">
+                            <label className="block font-semibold mb-2">Claim Description</label>
+                            <textarea
+                                value={claimDescription}
+                                onChange={(e) => setClaimDescription(e.target.value)}
+                                placeholder="Enter description here"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                rows={5}
+                            />
                         </div>
 
+                        {/* Claim Amount */}
+                        <div className="mb-4">
+                            <label className="block font-semibold mb-2">Claim Amount ($)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={claimAmount || ''}
+                                onChange={(e) => setClaimAmount(parseFloat(e.target.value) || 0)}
+                                placeholder="0.00"
+                                required
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <p className="text-sm text-gray-500 mt-1">Enter the total amount in dollars (e.g., 150.00)</p>
+                        </div>
+
+                        {/* Receipt Upload */}
+                        <div className="mb-4">
+                            <label className="block font-semibold mb-2">Upload Receipt</label>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".jpg,.jpeg,.png"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                                multiple
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition font-medium"
+                            >
+                                {receiptImages.length > 0 ? `Add More (${receiptImages.length} selected)` : 'Choose Files'}
+                            </button>
+                            <p className="text-sm text-gray-500 mt-1">
+                                Accepted formats: JPG, PNG. Max size: 5MB
+                            </p>
+
+                            {/* Image Preview */}
+                            {imagePreviews.length > 0 && (
+                                <div className="mt-4">
+                                    <p className="text-sm font-semibold mb-2">Previews:</p>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        {imagePreviews.map((preview, index) => (
+                                            <div key={index} className="relative">
+                                                <img
+                                                    src={preview}
+                                                    alt={`Receipt preview ${index + 1}`}
+                                                    className="w-full h-32 object-cover border border-gray-200 rounded-lg"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setReceiptImages(receiptImages.filter((_, i) => i !== index));
+                                                        setImagePreviews(imagePreviews.filter((_, i) => i !== index));
+                                                    }}
+                                                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-800"
+                                                >
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between items-center mt-6">
+                                <Link href="/employee/claim-dashboard">
+                                    <button className="bg-gray-400 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition font-medium">
+                                        Back
+                                    </button>
+                                </Link>
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={!isFormValid() || submitting}
+                                    className={`px-6 py-3 rounded-md transition font-medium ${isFormValid() && !submitting ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>
+                                    {submitting ? 'Submitting...' : 'Submit'}
+                                </button>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
