@@ -1,28 +1,97 @@
+/**
+ * Employee Claim Category Page - Step 2: Claim Details
+ * 
+ * Second step in the claim submission process where employees provide
+ * detailed claim information including category, description, amount,
+ * and receipt uploads.
+ * 
+ * Features:
+ * - Dynamic category selection from database
+ * - Category-specific fields (Medical: facehugger exposure; Travel: locations)
+ * - Multiple receipt image upload with preview
+ * - Form validation with visual feedback
+ * - Image file type and size validation
+ * 
+ * @author Robert Jones
+ * @page /employee/claim-category
+ * @requires User must be logged in
+ * @navigation Previous: /employee/claim-submit | Next: /employee/claim-success
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+/**
+ * Category data structure for claim categories
+ * 
+ * @author Robert Jones
+ * @interface Category
+ * @property {string} key - Unique identifier (e.g., "MEDICAL", "TRAVEL")
+ * @property {string} label - Display name for the category
+ */
 interface Category {
     key: string;
     label: string;
 }
 
+/**
+ * ClaimCategory Component
+ * 
+ * Main claim submission form with dynamic fields based on selected category.
+ * Handles validation, file uploads, and submission to the claims API.
+ * 
+ * @author Robert Jones
+ * @component
+ * @returns {JSX.Element} The claim details form page
+ */
 export default function ClaimCatagory() {
+    /** Selected claim category key (MEDICAL, TRAVEL, etc.) */
     const [selectedCategory, setSelectedCategory] = useState('');
+
+    /** Medical category only - indicates facehugger exposure */
     const [facehuggerExposure, setFacehuggerExposure] = useState(false);
+
+    /** Travel category only - destination address */
     const [destination, setDestination] = useState('');
+
+    /** Travel category only - origin/return address */
     const [returnTrip, setReturnTrip] = useState('');
+
+    /** Available claim categories fetched from API */
     const [categories, setCategories] = useState<Category[]>([]);
+
+    /** Uploaded receipt image files */
     const [receiptImages, setReceiptImages] = useState<File[]>([]);
+
+    /** Base64 preview URLs for uploaded images */
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+    /** Textual description of the claim */
     const [claimDescription, setClaimDescription] = useState('');
+
+    /** Monetary amount of the claim in dollars */
     const [claimAmount, setClaimAmount] = useState<number>(0);
+
+    /** Indicates if claim submission is in progress */
     const [submitting, setSubmitting] = useState(false);
+
+    /** Reference to hidden file input element */
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
+    /**
+     * Categories Fetching Effect
+     * 
+     * Fetches available claim categories from API on component mount.
+     * Categories are used to populate the category dropdown.
+     * 
+     * @author Robert Jones
+     * @effect
+     * @dependencies [] - Runs once on mount
+     */
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -44,6 +113,16 @@ export default function ClaimCatagory() {
         fetchCategories();
     }, []);
 
+    /**
+     * Handle Category Selection Change
+     * 
+     * Updates selected category and resets category-specific fields
+     * when switching between categories to prevent stale data.
+     * 
+     * @author Robert Jones
+     * @function handleCategoryChange
+     * @param {React.ChangeEvent<HTMLSelectElement>} e - Change event from select
+     */
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newCategory = e.target.value;
         setSelectedCategory(newCategory);
@@ -58,7 +137,18 @@ export default function ClaimCatagory() {
         }
     };
 
-    // Upload image of receipt
+    /**
+     * Handle Image Upload
+     * 
+     * Validates and processes uploaded receipt images.
+     * - Validates file types (JPEG, PNG only)
+     * - Validates file size (max 5MB)
+     * - Generates preview URLs using FileReader
+     * 
+     * @author Robert Jones
+     * @function handleImageUpload
+     * @param {React.ChangeEvent<HTMLInputElement>} e - Change event from file input
+     */
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
@@ -95,7 +185,17 @@ export default function ClaimCatagory() {
         e.target.value = '';
     };
 
-    // Validate form
+    /**
+     * Form Validation Check
+     * 
+     * Validates all required fields based on selected category:
+     * - Common: category, description, receipt images, amount > 0
+     * - Travel: destination and returnTrip required
+     * 
+     * @author Robert Jones
+     * @function isFormValid
+     * @returns {boolean} True if all required fields are valid
+     */
     const isFormValid = () => {
         // Check the required fields
         if (!selectedCategory || !claimDescription || !receiptImages.length || claimAmount <= 0) {
@@ -111,7 +211,18 @@ export default function ClaimCatagory() {
         return true;
     }
 
-    // Handle claim submission
+    /**
+     * Handle Claim Submission
+     * 
+     * Submits the claim data to the API endpoint.
+     * Builds a complete claim object including category-specific details.
+     * Redirects to success page on successful submission.
+     * 
+     * @author Robert Jones
+     * @async
+     * @function handleSubmit
+     * @returns {Promise<void>}
+     */
     const handleSubmit = async () => {
         if (!isFormValid() || submitting) return;
 
@@ -312,7 +423,6 @@ export default function ClaimCatagory() {
                                                 }}
                                                 className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-800"
                                             >
-                                                ×
                                             </button>
                                         </div>
                                     ))}
@@ -329,11 +439,7 @@ export default function ClaimCatagory() {
                             <button
                                 onClick={handleSubmit}
                                 disabled={!isFormValid() || submitting}
-                                className={`px-6 py-3 rounded-lg transition-colors font-semibold ${isFormValid() && !submitting
-                                    ? 'bg-blue-500 text-white hover:bg-blue-700'
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    }`}
-                            >
+                                className={`px-6 py-3 rounded-lg transition-colors font-semibold ${isFormValid() && !submitting ? 'bg-blue-500 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}>
                                 {submitting ? 'Submitting...' : 'Submit'}
                             </button>
                         </div>

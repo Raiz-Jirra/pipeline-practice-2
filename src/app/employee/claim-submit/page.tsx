@@ -1,16 +1,60 @@
+/**
+ * Employee Claim Submit Page - Step 1: Employee Information
+ * 
+ * First step in the multi-step claim submission process.
+ * Collects and validates employee's WY ID and phone number before
+ * proceeding to claim category selection.
+ * 
+ * Features:
+ * - Pre-fills user information from profile
+ * - Validates required fields before proceeding
+ * - Updates user profile with any changes
+ * - Authentication check and redirect
+ * 
+ * @author Robert Jones
+ * @page /employee/claim-submit
+ * @requires User must be logged in with valid userId in localStorage
+ * @navigation Next: /employee/claim-category
+ */
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 
+/**
+ * EmployeeClaimSubmit Component
+ * 
+ * First step form component for claim submission workflow.
+ * Collects employee identification information (WY ID and phone number)
+ * and validates before allowing progression to category selection.
+ * 
+ * @author Robert Jones
+ * @component
+ * @returns {JSX.Element} The employee information form page
+ */
 export default function EmployeeClaimSubmit() {
+
+    /** Employee's Weyland-Yutani ID (format: WY-###) */
     const [wyId, setWyId] = useState('');
+
+    /** Employee's phone number (format: ###-###-####) */
     const [phoneNumber, setPhoneNumber] = useState('');
+
+    /** Indicates if form submission is in progress */
     const [submitting, setSubmitting] = useState(false);
     const router = useRouter();
 
-    // Check if user is logged in
+    /**
+ * Authentication Check Effect
+ * 
+ * Verifies user is logged in on component mount.
+ * Redirects to login page if no userId found in localStorage.
+ * 
+ * @author Robert Jones
+ * @effect
+ * @dependencies [router]
+ */
     useEffect(() => {
         const userId = localStorage.getItem('userId');
         if (!userId) {
@@ -18,7 +62,16 @@ export default function EmployeeClaimSubmit() {
         }
     }, [router]);
 
-    // Fetch user profile on component mount to pre-fill WY ID and phone number
+    /**
+ * Profile Data Fetching Effect
+ * 
+ * Fetches user profile on mount to pre-populate WY ID and phone number fields.
+ * Improves UX by reducing manual data entry.
+ * 
+ * @author Robert Jones
+ * @effect
+ * @dependencies [] - Runs once on mount
+ */
     useEffect(() => {
         const fetchProfile = async () => {
             const userId = localStorage.getItem('userId');
@@ -34,9 +87,30 @@ export default function EmployeeClaimSubmit() {
         fetchProfile();
     }, []);
 
+    /**
+ * Form Validation Check
+ * 
+ * Validates that all required fields (WY ID and phone number) are filled out.
+ * 
+ * @author Robert Jones
+ * @function isFormValid
+ * @returns {boolean} True if form is valid and can be submitted
+ */
     const isFormValid = () => {
         return wyId.trim() !== '' && phoneNumber.trim() !== '';
     };
+
+    /**
+ * Handle Next Button Click
+ * 
+ * Saves employee information to database and navigates to claim category page.
+ * Performs validation, updates user profile, and handles errors.
+ * 
+ * @author Robert Jones
+ * @async
+ * @function handleNext
+ * @returns {Promise<void>}
+ */
     const handleNext = async () => {
         if (!isFormValid() || submitting) return;
 
