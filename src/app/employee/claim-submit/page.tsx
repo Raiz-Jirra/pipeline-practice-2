@@ -152,63 +152,90 @@ export default function EmployeeClaimSubmit() {
     };
 
     return (
-        <div className="container mx-auto p-6 max-w-6xl">
-            {/* Header */}
-            <header>
-                <div className="flex items-center gap-4 mb-6">
-                    <img src="/images/weyyuLogo.png" alt="Company Logo" width={150} height={150} />
-                    <div className="text-3xl font-bold">
-                        Welcome to Weyland-Yutani's Employee Claims Service
-                    </div>
-                </div>
-            </header>
-
-            <div className="max-w-3xl mx-auto">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold mb-2">Submit Your Claim!</h1>
-                    <p className="text-gray-600">Please fill out the form below to submit a new claim</p>
-                </div>
-
-                {/* Claim Submission Form */}
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold mb-6">Employee Information</h2>
-                    <form>
-                        <div className="flex gap-4 mb-4">
-
-                            {/* WY ID Number */}
-                            <div className="flex-1">
-                                <label className="block font-semibold mb-2">Weyland-Yutani ID</label>
-                                <input type="text" value={wyId} onChange={(e) => setWyId(e.target.value)} placeholder="Example: WY-000" pattern="WY-\d{3}" title="Format: WY-### (e.g., WY-000)" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-
-                            </div>
-
-                            {/* Phone Number */}
-                            <div className="flex-1">
-                                <label className="block font-semibold mb-2">Phone Number</label>
-                                <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Example: 000-000-0000" pattern="\d{3}-\d{3}-\d{4}" title="Format: ###-###-#### (e.g., 555-123-4567)" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-
+        <>
+            <div className="min-h-screen bg-gray-100">
+                {/* Header */}
+                <header className="bg-white shadow-sm border-b border-gray-200">
+                    <div className="max-w-7xl mx-auto px-6 py-4">
+                        <div className="flex items-center gap-4">
+                            <img src="/images/weyyuLogo.png" alt="Company Logo" width={120} height={120} />
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900">Weyland-Yutani Corp</h1>
+                                <p className="text-sm text-gray-600">Employee Claims Service</p>
                             </div>
                         </div>
-                    </form>
-                    <div className="flex justify-between items-center mt-6">
-                        <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
-                            <Link href="/employee/claim-dashboard">
-                                Back
-                            </Link>
-                        </button>
-                        <button
-                            onClick={handleNext}
-                            disabled={!isFormValid() || submitting}
-                            className={`px-6 py-3 rounded-lg transition-colors font-semibold ${isFormValid() && !submitting
-                                ? 'bg-blue-500 text-white hover:bg-blue-700 cursor-pointer'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
-                        >
-                            {submitting ? 'Saving...' : 'Next'}
-                        </button>
                     </div>
-                </div>
+                </header>
+
+                {/* Main Content */}
+                <main className="max-w-4xl mx-auto px-6 py-8">
+                    {/* Page Title */}
+                    <div className="mb-6">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Submit Your Claim!</h2>
+                        <p className="text-gray-600">Please fill out the form below to submit a new claim</p>
+                    </div>
+
+                    {/* Claim Submission Form */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <h3 className="text-xl font-bold text-gray-900 mb-6 border-b border-gray-200 pb-3">Employee Information</h3>
+
+                        <form className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* WY ID Number */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Weyland-Yutani ID
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={wyId}
+                                        onChange={(e) => setWyId(e.target.value)}
+                                        placeholder="Example: WY-000"
+                                        pattern="WY-\d{3}"
+                                        title="Format: WY-### (e.g., WY-000)"
+                                        className="w-full border border-gray-300 rounded-md px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                    />
+                                </div>
+
+                                {/* Phone Number */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Phone Number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        placeholder="Example: 000-000-0000"
+                                        pattern="\d{3}-\d{3}-\d{4}"
+                                        title="Format: ###-###-#### (e.g., 555-123-4567)"
+                                        className="w-full border border-gray-300 rounded-md px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                    />
+                                </div>
+                            </div>
+                        </form>
+
+                        {/* Navigation Buttons */}
+                        <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+                            <Link href="/employee/claim-dashboard">
+                                <button className="bg-gray-500 text-white px-6 py-2.5 rounded-md hover:bg-gray-600 transition font-medium">
+                                    Back
+                                </button>
+                            </Link>
+                            <button
+                                onClick={handleNext}
+                                disabled={!isFormValid() || submitting}
+                                className={`px-6 py-2.5 rounded-md transition font-medium ${isFormValid() && !submitting
+                                    ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                            >
+                                {submitting ? 'Saving...' : 'Next'}
+                            </button>
+                        </div>
+                    </div>
+                </main>
             </div>
-        </div>
+        </>
     );
 }
