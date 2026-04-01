@@ -283,6 +283,33 @@ export async function getEmployeeClaims(userId?: string) {
     }
 }
 
+export async function getEmployees() {
+    const mongoClient = new MongoClient(MONGO_URL);
+
+    try {
+        await mongoClient.connect();
+
+        const db = mongoClient.db(MONGO_DB_NAME);
+        const users = db.collection("users");
+
+        const employees = await users
+            .find({ role: "EMPLOYEE" })
+            .toArray();
+
+        return employees.map(user => ({
+            id: user._id.toString(),
+            firstName: user.firstName,
+            lastName: user.lastName
+        }));
+
+    } catch (error: any) {
+        console.log(`Error: ${error.message}`);
+        throw error;
+    } finally {
+        await mongoClient.close();
+    }
+}
+
 
 
 /* ----------------------------------------------------------CATEGORY MANAGEMENT*/
