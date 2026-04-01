@@ -15,7 +15,7 @@ export default async function Dashboard() {
 
 
                 {/* <Link href="/employee/claim-submit"> */}
-                <Link href="#">
+                <Link href="/admin/dashboard/claims/create">
                     <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
                         File a Claim
                     </button>
