@@ -96,6 +96,21 @@ export default function EmployeeClaimSubmit({
     }, [employeeId]);
 
     /**
+     * Handle Logout
+     * 
+     * Clears user session data from localStorage and redirects
+     * to the employee login page.
+     * 
+     * @author Robert Jones
+     * @function handleLogout
+     * @returns {void}
+     */
+    const handleLogout = () => {
+        localStorage.removeItem('userId');
+        router.push('/employee/login');
+    };
+
+    /**
      * Form Validation Check
      * 
      * Ensures WY ID and phone number are present.
@@ -168,75 +183,89 @@ export default function EmployeeClaimSubmit({
         <div className="container mx-auto p-6 max-w-6xl">
 
             {/* Header */}
-            <header>
-                <div className="flex items-center gap-4 mb-6">
-                    <img src="/images/weyyuLogo.png" width={150} />
-                    <div className="text-3xl font-bold">
-                        Welcome to Weyland-Yutani's Employee Claims Service
-                    </div>
-                </div>
-            </header>
-
-            <div className="max-w-3xl mx-auto">
-
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold mb-2">Submit Your Claim!</h1>
-                    <p className="text-gray-600">Please fill out the form below</p>
-                </div>
-
-
-
-                <div className="bg-white rounded-lg shadow p-6">
-
-                    <h2 className="text-xl font-semibold mb-6">
-                        Employee Information
-                    </h2>
-
-                    <div className="flex gap-4 mb-4">
-
-                        {/* WY ID */}
-                        <div className="flex-1">
-                            <label className="block font-semibold mb-2">
-                                Weyland-Yutani ID
-                            </label>
-                            <input
-                                type="text"
-                                value={wyId}
-                                className="w-full border rounded px-4 py-2"
-                                disabled
-                            />
-                        </div>
-
-                        {/* Phone */}
-                        <div className="flex-1">
-                            <label className="block font-semibold mb-2">
-                                Phone Number
-                            </label>
-                            <input
-                                type="tel"
-                                value={phoneNumber}
-                                className="w-full border rounded px-4 py-2"
-                                disabled
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex justify-between mt-6">
-
-                        <Link href={isAdmin ? "/admin/dashboard/claims" : "/employee/claim-dashboard"}>
-                            <button className="bg-gray-500 text-white px-6 py-3 rounded-lg">
-                                Cancel
+            <div className="min-h-screen bg-gray-100">
+                {/* Header */}
+                <header className="bg-white shadow-sm border-b border-gray-200">
+                    <div className="max-w-7xl mx-auto px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <img src="/images/weyyuLogo.png" alt="Company Logo" width={120} height={120} />
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900">Weyland-Yutani Corp</h1>
+                                    <p className="text-sm text-gray-600">Employee Claims Service</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition font-medium"
+                            >
+                                Log Out
                             </button>
-                        </Link>
+                        </div>
+                    </div>
+                </header>
 
-                        <button
-                            onClick={handleNext}
-                            disabled={!isFormValid() || submitting}
-                            className="bg-blue-600 text-white px-6 py-3 rounded-lg"
-                        >
-                            {submitting ? 'Saving...' : 'Next'}
-                        </button>
+                <div className="max-w-3xl mx-auto">
 
+                    <div className="mb-6">
+                        <h1 className="text-3xl font-bold mb-2">Submit Your Claim!</h1>
+                        <p className="text-gray-600">Please fill out the form below</p>
+                    </div>
+
+
+
+                    <div className="bg-white rounded-lg shadow p-6">
+
+                        <h2 className="text-xl font-semibold mb-6">
+                            Employee Information
+                        </h2>
+
+                        <div className="flex gap-4 mb-4">
+
+                            {/* WY ID */}
+                            <div className="flex-1">
+                                <label className="block font-semibold mb-2">
+                                    Weyland-Yutani ID
+                                </label>
+                                <input
+                                    type="text"
+                                    value={wyId}
+                                    className="w-full border rounded px-4 py-2"
+                                    disabled
+                                />
+                            </div>
+
+                            {/* Phone */}
+                            <div className="flex-1">
+                                <label className="block font-semibold mb-2">
+                                    Phone Number
+                                </label>
+                                <input
+                                    type="tel"
+                                    value={phoneNumber}
+                                    className="w-full border rounded px-4 py-2"
+                                    disabled
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between mt-6">
+
+                            <Link href={isAdmin ? "/admin/dashboard/claims" : "/employee/claim-dashboard"}>
+                                <button className="bg-gray-500 text-white px-6 py-3 rounded-lg">
+                                    Cancel
+                                </button>
+                            </Link>
+
+                            <button
+                                onClick={handleNext}
+                                disabled={!isFormValid() || submitting}
+                                className="bg-blue-600 text-white px-6 py-3 rounded-lg"
+                            >
+                                {submitting ? 'Saving...' : 'Next'}
+                            </button>
+
+                        </div>
                     </div>
                 </div>
             </div>

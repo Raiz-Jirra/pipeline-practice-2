@@ -272,7 +272,8 @@ export async function getEmployeeClaims(userId?: string) {
             category: claim.category,
             amount: claim.amount,
             status: claim.status.toLowerCase(),
-            description: claim.description
+            description: claim.description,
+            comment: claim.comment || "",
         }));
 
         return formattedClaims;
