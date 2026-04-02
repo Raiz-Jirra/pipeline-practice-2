@@ -235,6 +235,8 @@ export async function getAdminClaims() {
             description: claim.description,
             amount: claim.amount,
             status: claim.status,
+            comment: claim.comment || "",
+            imageUrls: (claim.receipts || []).map((file: string) => `/uploads/${file}`),
             date: claim.date?.toISOString(),
             createdAt: claim.createdAt?.toISOString(),
             firstName: claim.employee.firstName,
@@ -695,6 +697,8 @@ export async function updateStatus(request: NextRequest, id: string) {
 
         const sanitizedId = sanitizeHtml(id);
         const sanitizedStatus = sanitizeHtml(body.status);
+        const sanitizedComment = body.comment ? sanitizeHtml(body.comment) : null;
+
 
         if (!["APPROVED", "REJECTED"].includes(sanitizedStatus)) {
             return NextResponse.json(
@@ -703,12 +707,27 @@ export async function updateStatus(request: NextRequest, id: string) {
             );
         }
 
+        if (sanitizedStatus === "REJECTED" && !sanitizedComment) {
+            return NextResponse.json(
+                { error: "Comment is required when rejecting a claim" },
+                { status: 400 }
+            );
+        }
+
         const db = mongoClient.db(MONGO_DB_NAME);
         const claims = db.collection("claims");
 
+        const updateFields: any = {
+            status: sanitizedStatus,
+        };
+
+        if (sanitizedStatus === "REJECTED") {
+            updateFields.comment = sanitizedComment;
+        }
+
         const result = await claims.updateOne(
             { claimId: sanitizedId },
-            { $set: { status: sanitizedStatus } }
+            { $set: updateFields }
         );
 
         if (result.matchedCount === 0) {
