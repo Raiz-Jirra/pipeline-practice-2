@@ -251,12 +251,11 @@ export default function EmployeeClaimForm() {
                                                 <td className="px-6 py-4 text-gray-700">{claim.description}</td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex gap-2">
-                                                        <button className="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition text-xs font-medium">
-                                                            View JPEG
-                                                        </button>
-                                                        <button className="bg-slate-600 text-white px-3 py-1.5 rounded-md hover:bg-slate-700 transition text-xs font-medium">
-                                                            View PDF
-                                                        </button>
+                                                        <Link href={`/employee/claim-details/${claim.id}`}>
+                                                            <button className="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition text-xs font-medium">
+                                                                Details
+                                                            </button>
+                                                        </Link>
                                                     </div>
                                                 </td>
                                             </tr>
