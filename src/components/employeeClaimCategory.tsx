@@ -310,21 +310,27 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-6 py-8">
+            <main className="max-w-7xl mx-auto px-6 py-10 space-y-6">
+
                 <div className="max-w-3xl mx-auto">
-                    <div className="mb-6">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Submit Your Claim!</h2>
-                        <p className="text-gray-600">Please fill out the form below to submit a new claim</p>
+                    <div className="mb-8">
+                        <h2 className="text-3xl font-bold text-gray-900">
+                            Submit Your Claim
+                        </h2>
+                        <p className="text-gray-500 mt-1">
+                            Fill out your claim details below
+                        </p>
                     </div>
 
                     {/* Claim Catagory */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-xl font-semibold mb-6">Claim Information</h2>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 space-y-6">
+                        <h2 className="text-lg font-semibold text-gray-900">Claim Information</h2>
+
 
                         {/* Select Category */}
                         <div className="mb-4">
                             <label className="block font-semibold mb-2">Category</label>
-                            <select value={selectedCategory} onChange={handleCategoryChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select value={selectedCategory} onChange={handleCategoryChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Select a category</option>
                                 {categories.map((category) => (
                                     <option key={category.key} value={category.key}>
@@ -336,11 +342,11 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
 
                         {/* Medical Category checkbox */}
                         {selectedCategory === 'MEDICAL' && (
-                            <div className="mb-4">
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        className="w-4 h-4"
+                                        className=" border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         checked={facehuggerExposure}
                                         onChange={(e) => setFacehuggerExposure(e.target.checked)}
                                     />
@@ -359,7 +365,7 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                                         value={destination}
                                         onChange={(e) => setDestination(e.target.value)}
                                         placeholder="Enter Address"
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
                                 <div>
@@ -369,7 +375,7 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                                         value={returnTrip}
                                         onChange={(e) => setReturnTrip(e.target.value)}
                                         placeholder="Enter Address"
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
                             </div>
@@ -382,8 +388,8 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                                 value={claimDescription}
                                 onChange={(e) => setClaimDescription(e.target.value)}
                                 placeholder="Enter description here"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                rows={5}
+                                className=" resize-none w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                rows={4}
                             />
                         </div>
 
@@ -398,7 +404,7 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                                 onChange={(e) => setClaimAmount(parseFloat(e.target.value) || 0)}
                                 placeholder="0.00"
                                 required
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <p className="text-sm text-gray-500 mt-1">Enter the total amount in dollars (e.g., 150.00)</p>
                         </div>
@@ -417,7 +423,7 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition font-medium"
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
                             >
                                 {receiptImages.length > 0 ? `Add More (${receiptImages.length} selected)` : 'Choose Files'}
                             </button>
@@ -435,7 +441,7 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                                                 <img
                                                     src={preview}
                                                     alt={`Receipt preview ${index + 1}`}
-                                                    className="w-full h-32 object-cover border border-gray-200 rounded-lg"
+                                                    className="w-full h-32 object-cover rounded-lg border hover:scale-105 transition"
                                                 />
                                                 <button
                                                     type="button"
@@ -443,8 +449,9 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                                                         setReceiptImages(receiptImages.filter((_, i) => i !== index));
                                                         setImagePreviews(imagePreviews.filter((_, i) => i !== index));
                                                     }}
-                                                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-800"
+                                                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
                                                 >
+                                                    ✕
                                                 </button>
                                             </div>
                                         ))}
@@ -452,13 +459,14 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                                 </div>
                             )}
 
-                            <div className="flex justify-between items-center mt-6">
+                            <div className="flex justify-between items-center pt-4">
+
                                 <Link href={
                                     isAdminFromUrl || isAdmin
                                         ? "/admin/dashboard/claims/create"
                                         : "/employee/claim-submit"
                                 }>
-                                    <button className="bg-gray-400 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition font-medium">
+                                    <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition">
                                         Back
                                     </button>
                                 </Link>
@@ -466,15 +474,12 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
                                 <button
                                     onClick={handleSubmit}
                                     disabled={!isFormValid() || submitting}
-                                    className={`px-6 py-3 rounded-md transition-colors font-medium ${isFormValid() && !submitting
-                                        ? 'bg-blue-500 text-white hover:bg-blue-700'
-                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        }`}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
                                 >
                                     {submitting ? 'Submitting...' : 'Submit'}
                                 </button>
-                            </div>
 
+                            </div>
                         </div>
                     </div>
                 </div>

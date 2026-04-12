@@ -152,7 +152,7 @@ export default function EmployeeClaimSubmit({
     };
 
     return (
-        <div className="container mx-auto p-6 max-w-6xl">
+        <div className="min-h-screen bg-gray-100">
 
             {/* Header */}
             <div className="min-h-screen bg-gray-100">
@@ -172,22 +172,28 @@ export default function EmployeeClaimSubmit({
                     </div>
                 </header>
 
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-xl mx-auto px-6 py-10">
 
-                    <div className="mb-6">
-                        <h1 className="text-3xl font-bold mb-2">Submit Your Claim!</h1>
-                        <p className="text-gray-600">Please fill out the form below</p>
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Submit Your Claim
+                        </h1>
+                        <p className="text-gray-500 mt-1">
+                            Please confirm your details before continuing
+                        </p>
                     </div>
 
 
 
-                    <div className="bg-white rounded-lg shadow p-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 space-y-6">
 
-                        <h2 className="text-xl font-semibold mb-6">
+                        <h2 className="text-lg font-semibold text-gray-900">
                             Employee Information
                         </h2>
 
-                        <div className="flex gap-4 mb-4">
+                        <hr className="border-gray-200" />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                             {/* WY ID */}
                             <div className="flex-1">
@@ -197,7 +203,7 @@ export default function EmployeeClaimSubmit({
                                 <input
                                     type="text"
                                     value={wyId}
-                                    className="w-full border rounded px-4 py-2"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-700"
                                     disabled
                                 />
                             </div>
@@ -210,16 +216,16 @@ export default function EmployeeClaimSubmit({
                                 <input
                                     type="tel"
                                     value={phoneNumber}
-                                    className="w-full border rounded px-4 py-2"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-700"
                                     disabled
                                 />
                             </div>
                         </div>
 
-                        <div className="flex justify-between mt-6">
+                        <div className="flex justify-between items-center pt-4">
 
                             <Link href={isAdmin ? "/admin/dashboard/claims" : "/employee/claim-dashboard"}>
-                                <button className="bg-gray-500 text-white px-6 py-3 rounded-lg">
+                                <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition">
                                     Cancel
                                 </button>
                             </Link>
@@ -227,7 +233,7 @@ export default function EmployeeClaimSubmit({
                             <button
                                 onClick={handleNext}
                                 disabled={!isFormValid() || submitting}
-                                className="bg-blue-600 text-white px-6 py-3 rounded-lg"
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
                             >
                                 {submitting ? 'Saving...' : 'Next'}
                             </button>

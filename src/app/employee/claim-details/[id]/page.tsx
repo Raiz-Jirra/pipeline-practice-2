@@ -6,7 +6,6 @@ import Link from "next/link";
 
 export default function EmployeeClaimDetails() {
     const params = useParams<{ id: string }>();
-    const router = useRouter();
     const id = params.id;
 
     const [claim, setClaim] = useState<any>(null);
@@ -40,14 +39,6 @@ export default function EmployeeClaimDetails() {
         fetchClaim();
     }, [id]);
 
-    const handleLogout = async () => {
-        await fetch("/api/logout", {
-            method: "POST",
-            credentials: "include"
-        });
-
-        window.location.href = "/employee/login";
-    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -90,65 +81,62 @@ export default function EmployeeClaimDetails() {
                         </div>
                     </div>
 
-                    <button
-                        onClick={handleLogout}
-                        className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
-                    >
-                        Log Out
-                    </button>
                 </div>
             </header>
 
-            <main className="max-w-5xl mx-auto px-6 py-8">
+            <main className="max-w-5xl mx-auto px-6 py-10">
 
-                <Link href="/employee/claim-dashboard">
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition mb-6">
-                        Back to Dashboard
-                    </button>
-                </Link>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                        {claim.id} Details
+                    </h2>
 
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                    Claim Details - {claim.id}
-                </h2>
+                    <Link href="/employee/claim-dashboard">
+                        <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition text-white">
+                            Back to Dashboard
+                        </button>
+                    </Link>
+                </div>
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 space-y-6">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 space-y-8">
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-6 text-sm">
 
-                        <p>
-                            <strong>Date:</strong><br />
-                            <span className="text-gray-700">{claim.date}</span>
-                        </p>
+                        <div>
+                            <p className="text-gray-500">Date</p>
+                            <p className="font-semibold">{claim.date}</p>
+                        </div>
 
-                        <p>
-                            <strong>Category:</strong><br />
-                            <span className="text-gray-700">{claim.category}</span>
-                        </p>
+                        <div>
+                            <p className="text-gray-500">Category</p>
+                            <p className="font-semibold">{claim.category}</p>
+                        </div>
 
-                        <p>
-                            <strong>Amount:</strong><br />
-                            <span className="text-gray-900 font-semibold">
+                        <div>
+                            <p className="text-gray-500">Amount</p>
+                            <p className="font-semibold text-gray-900">
                                 ${claim.amount}
-                            </span>
-                        </p>
+                            </p>
+                        </div>
 
-                        <p>
-                            <strong>Status:</strong><br />
-                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(claim.status)}`}>
+                        <div>
+                            <p className="text-gray-500">Status</p>
+                            <span className={`px-3 py-1.5 rounded-full text-sm font-semibold inline-block mt-1 ${getStatusColor(claim.status)}`}>
                                 {claim.status}
                             </span>
-                        </p>
+                        </div>
+
                     </div>
 
                     <div>
-                        <strong>Description:</strong>
-                        <p className="text-gray-700 mt-1">{claim.description}</p>
+                        <p className="text-gray-500 text-sm">Description</p>
+                        <p className="mt-1 text-gray-800">{claim.description}</p>
                     </div>
 
 
                     {claim.receipts && claim.receipts.length > 0 && (
-                        <div className="mt-6">
-                            <h3 className="text-lg font-semibold mb-2">Receipts</h3>
+                        <div>
+                            <h3 className="font-semibold mb-2">Receipts</h3>
 
                             <div className="flex flex-wrap gap-4">
                                 {claim.receipts.map((file: string, index: number) => (
@@ -156,7 +144,7 @@ export default function EmployeeClaimDetails() {
                                         key={index}
                                         src={`/uploads/${file}`}
                                         alt="Receipt"
-                                        className="w-48 h-48 object-cover rounded-lg border"
+                                        className="w-60 h-52 object-cover rounded-lg border hover:scale-105 transition"
                                         onError={(e) => {
                                             e.currentTarget.src = "/images/placeholder.png";
                                         }}
@@ -166,8 +154,10 @@ export default function EmployeeClaimDetails() {
                         </div>
                     )}
 
+                    <hr className="border-gray-200" />
+
                     {claim.status === "rejected" && (
-                        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                             <strong className="text-red-700">Rejection Reason:</strong>
                             <p className="text-red-600 mt-1">
                                 {claim.comment || "No comment provided"}

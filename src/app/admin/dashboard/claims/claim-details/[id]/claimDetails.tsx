@@ -60,69 +60,98 @@ export default function claimDetails({ claims }: any) {
     return (
         <>
             <LoadingOverlay show={loading} bgColor="rgba(3,80,116,0.8)" spinnerColor="#FFFFFF" />
-            <div className="space-y-6">
-                <Link href="/admin/dashboard/claims" className="round-md bg-blue-600 text-white px-2 py-2 mb-2 rounded">
-                    Back to claims
-                </Link>
-                <h1 className="text-2xl font-bold mt-2">
-                    Reviewing {foundClaim.claimId}
-                </h1>
 
-                <div className="bg-white p-6 rounded-lg shadow space-y-4">
-                    <p>
-                        <strong>Employee:</strong> {foundClaim.firstName} {foundClaim.lastName}
-                    </p>
 
-                    {foundClaim.date && (
-                        <p>
-                            <strong>Date:</strong>{" "}
-                            {new Date(foundClaim.date).toISOString().split("T")[0]}
-                        </p>
-                    )}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl font-bold">
+                        Claim {foundClaim.claimId}
+                    </h1>
 
-                    <p>
-                        <strong>Category:</strong> {foundClaim.category}
-                    </p>
+                    <Link
+                        href="/admin/dashboard/claims"
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium"
+                    >
+                        Back
+                    </Link>
+                </div>
 
-                    <p>
-                        <strong>Amount:</strong> ${foundClaim.amount}
-                    </p>
+                <div className="bg-gray-50 p-8 rounded-2xl shadow-md space-y-6 border border-gray-100">
 
-                    <p>
-                        <strong>Description:</strong> {foundClaim.description}
-                    </p>
+                    <div>
+                        <p className="text-gray-500 text-sm mb-1">Status</p>
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${foundClaim.status === "APPROVED"
+                            ? "bg-green-100 text-green-700"
+                            : foundClaim.status === "REJECTED"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
+                        >
+                            {foundClaim.status}
+                        </span>
+                    </div>
 
-                    {foundClaim.imageUrls?.length > 0 && (
+                    <div className="grid grid-cols-2 gap-6 text-sm">
                         <div>
-                            <strong>Receipts:</strong>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
-                                {foundClaim.imageUrls.map((img: string, index: number) => (
-                                    <img
-                                        key={index}
-                                        src={img}
-                                        alt="Receipt"
-                                        className="w-full h-32 object-cover rounded border"
-                                    />
-                                ))}
+                            <p className="text-gray-500">Employee</p>
+                            <p className="font-semibold">{foundClaim.firstName} {foundClaim.lastName}</p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Date</p>
+                            <p className="font-semibold">
+                                {new Date(foundClaim.date).toISOString().split("T")[0]}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Category</p>
+                            <p className="font-semibold">{foundClaim.category}</p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Amount</p>
+                            <p className="font-semibold">${foundClaim.amount}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p className="text-gray-500 text-sm">Description</p>
+                        <p className="mt-1 text-gray-800">{foundClaim.description}</p>
+                    </div>
+
+
+                    {foundClaim.category === "TRAVEL" && foundClaim.travelDetails && (
+                        <div className="bg-gray-50 p-4 rounded-xl border">
+                            <h3 className="font-semibold mb-2">Travel Details</h3>
+
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p className="text-gray-500">From</p>
+                                    <p>{foundClaim.travelDetails.startLocation}</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-gray-500">To</p>
+                                    <p>{foundClaim.travelDetails.endLocation}</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-gray-500">Mileage</p>
+                                    <p>{foundClaim.travelDetails.estimatedMileage}</p>
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    {foundClaim.category === "TRAVEL" && foundClaim.travelDetails && (
-                        <div className="mt-4">
-                            <h3 className="font-semibold">Travel Details</h3>
-                            <p>From: {foundClaim.travelDetails.startLocation}</p>
-                            <p>To: {foundClaim.travelDetails.endLocation}</p>
-                            <p>Mileage: {foundClaim.travelDetails.estimatedMileage}</p>
-                        </div>
-                    )}
-
                     {foundClaim.category === "MEDICAL" && foundClaim.medicalDetails && (
-                        <div>
-                            <strong>Medical:</strong>
+                        <div className="bg-gray-50 p-4 rounded-xl border">
+                            <h3 className="font-semibold mb-2">Medical Details</h3>
                             <p>
-                                Facehugger Exposure:{" "}
-                                {foundClaim.medicalDetails.specialExposure ? "Yes" : "No"}
+                                Exposure:{" "}
+                                <span className="font-semibold">
+                                    {foundClaim.medicalDetails.specialExposure ? "Yes" : "No"}
+                                </span>
                             </p>
                         </div>
                     )}
@@ -135,38 +164,42 @@ export default function claimDetails({ claims }: any) {
                         </p>
                     )}
 
-                    {/* Status Badge 🔥 */}
-                    <p>
-                        <strong>Status:</strong>{" "}
-                        <span
-                            className={`px-2 py-1 rounded text-sm font-semibold ${foundClaim.status === "APPROVED"
-                                ? "bg-green-100 text-green-700"
-                                : foundClaim.status === "REJECTED"
-                                    ? "bg-red-100 text-red-700"
-                                    : "bg-yellow-100 text-yellow-700"
-                                }`}
-                        >
-                            {foundClaim.status}
-                        </span>
-                    </p>
 
+
+                    {foundClaim.imageUrls?.length > 0 && (
+                        <div>
+                            <h3 className="font-semibold mb-2">Receipts</h3>
+
+                            <div className="flex gap-4 flex-wrap">
+                                {foundClaim.imageUrls.map((img: string, index: number) => (
+                                    <img
+                                        key={index}
+                                        src={img}
+                                        alt="Receipt"
+                                        className="w-60 h-52 object-cover rounded-lg border hover:scale-105 transition"
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {foundClaim.status === "PENDING" && (
-                    <div className="flex gap-4">
-                        <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={() => updateStatus("APPROVED")}>
+                    <div className="flex justify-end gap-4">
+                        <button className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-semibold" onClick={() => updateStatus("APPROVED")}>
                             Approve
                         </button>
 
-                        <button className="bg-red-600 text-white px-4 py-2 rounded" onClick={() => setShowRejectBox(true)}>
+                        <button className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-semibold" onClick={() => setShowRejectBox(true)}>
                             Reject
                         </button>
+
                     </div>
                 )}
 
 
                 {showRejectBox && (
-                    <div className="mt-4 bg-white p-4 rounded shadow space-y-3">
+                    <div className="mt-4 bg-red-50 border border-red-200 p-4 rounded-lg shadow-sm space-y-3">
                         <h3 className="font-semibold">Rejection Comment</h3>
 
                         <textarea

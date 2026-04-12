@@ -98,10 +98,13 @@ export default function EmployeeClaimForm() {
                 const profileData = await profileRes.json();
                 const claimsData = await claimsRes.json();
 
-                if (profileData.success) {
-                    setFirstName(profileData.profile.firstName);
-                    setLastName(profileData.profile.lastName);
+
+
+                if (profileData) {
+                    setFirstName(profileData.firstName || "User");
+                    setLastName(profileData.lastName || "");
                 }
+
 
                 if (claimsData.success) {
                     setClaims(claimsData.claims);
@@ -206,6 +209,8 @@ export default function EmployeeClaimForm() {
                         </div>
                     </div>
                 </header>
+
+
 
                 {/* Main Content */}
                 <main className="max-w-7xl mx-auto px-6 py-8">
