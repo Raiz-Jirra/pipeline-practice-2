@@ -63,13 +63,17 @@ export default function Login() {
             return;
         }
 
-        const role = result.data.role;
+        router.push("/admin/dashboard/claims");
 
-        if (role === "ADMIN") {
-            router.push("/admin/dashboard/claims");
-        } else if (!(role === "ADMIN")) {
-            alert("Access Denied: You do not have admin privileges.")
-        }
+
+
+        // const role = result.data.role;
+
+        // if (role === "ADMIN") {
+        //     router.push("/admin/dashboard/claims");
+        // } else if (!(role === "ADMIN")) {
+        //     alert("Access Denied: You do not have admin privileges.")
+        // }
     };
 
     return (

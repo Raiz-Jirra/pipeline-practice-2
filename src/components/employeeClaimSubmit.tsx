@@ -60,40 +60,57 @@ export default function EmployeeClaimSubmit({
     const router = useRouter();
 
     /**
-     * Authentication Check Effect
+     * Authentication Check Effect and Profile Data Fetching Effect
      * 
-     * Verifies user is logged in on component mount.
+     * Verifies user is logged in on component mount and Fetches user to pre-fill WY ID and phone number.
      */
     useEffect(() => {
-        const userId = employeeId || localStorage.getItem('userId');
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch(`/api/employee/profile`);
 
-        if (!userId) {
-            router.push('/employee/login');
-        }
-    }, [employeeId, router]);
+                if (res.status === 401) {
+                    router.push('/employee/login');
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (data.success && data.profile) {
+                    setWyId(data.profile.wyId || '');
+                    setPhoneNumber(data.profile.phoneNumber || '');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchProfile();
+    }, [router]);
+
 
     /**
      * Profile Data Fetching Effect
      * 
      * Fetches user profile to pre-fill WY ID and phone number.
      */
-    useEffect(() => {
-        const fetchProfile = async () => {
-            const userId = employeeId || localStorage.getItem('userId');
+    // useEffect(() => {
+    //     const fetchProfile = async () => {
+    //         const userId = employeeId || localStorage.getItem('userId');
 
-            if (userId) {
-                const res = await fetch(`/api/employee/profile?userId=${userId}`);
-                const data = await res.json();
+    //         if (userId) {
+    //             const res = await fetch(`/api/employee/profile?userId=${userId}`);
+    //             const data = await res.json();
 
-                if (data.success && data.profile) {
-                    setWyId(data.profile.wyId);
-                    setPhoneNumber(data.profile.phoneNumber);
-                }
-            }
-        };
+    //             if (data.success && data.profile) {
+    //                 setWyId(data.profile.wyId);
+    //                 setPhoneNumber(data.profile.phoneNumber);
+    //             }
+    //         }
+    //     };
 
-        fetchProfile();
-    }, [employeeId]);
+    //     fetchProfile();
+    // }, [employeeId]);
 
     /**
      * Handle Logout
@@ -105,9 +122,9 @@ export default function EmployeeClaimSubmit({
      * @function handleLogout
      * @returns {void}
      */
-    const handleLogout = () => {
-        localStorage.removeItem('userId');
-        router.push('/employee/login');
+    const handleLogout = async () => {
+        await fetch("/api/employee/logout", { method: "POST" });
+        router.push("/employee/login");
     };
 
     /**
@@ -139,19 +156,10 @@ export default function EmployeeClaimSubmit({
         setSubmitting(true);
 
         try {
-            const userId = employeeId || localStorage.getItem('userId');
-
-            if (!userId) {
-                alert('Please log in to continue');
-                router.push('/employee/login');
-                return;
-            }
-
             const res = await fetch('/api/employee/updateProfile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId,
                     phoneNumber,
                     wyId
                 })
@@ -160,17 +168,14 @@ export default function EmployeeClaimSubmit({
             const result = await res.json();
 
             if (result.success) {
-
                 if (isAdmin) {
-                    router.push(`/admin/dashboard/claims/create/category?employeeId=${userId}&admin=true`);
+                    router.push(`/admin/dashboard/claims/create/category?admin=true`);
                 } else {
                     router.push('/employee/claim-category');
                 }
-
             } else {
                 alert(result.error || 'Failed to save information');
             }
-
         } catch (err) {
             console.error(err);
             alert('Error saving information');

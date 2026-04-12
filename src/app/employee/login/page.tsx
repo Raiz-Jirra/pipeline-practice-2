@@ -64,17 +64,7 @@ export default function Login() {
             return;
         }
 
-        const role = result.data.role;
-        const userId = result.data.userId;
-
-        localStorage.setItem('userId', userId);
-        localStorage.setItem('userRole', role);
-
-        if (role === "EMPLOYEE") {
-            router.push("/employee/claim-dashboard");
-        } else if (!(role === "EMPLOYEE")) {
-            alert("Access Denied: You do not have employee privileges.")
-        }
+        router.push("/employee/claim-dashboard");
     };
 
     return (

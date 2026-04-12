@@ -84,40 +84,33 @@ export default function EmployeeClaimForm() {
             try {
                 setLoading(true);
 
-                // Check if user is logged in
-                const userId = localStorage.getItem('userId');
-                if (!userId) {
-                    router.push('/employee/login');
+                // Fetch user profile and claims in parallel
+                const [profileRes, claimsRes] = await Promise.all([
+                    fetch("/api/employee/profile"),
+                    fetch("/api/employee/claims")
+                ]);
+
+                if (profileRes.status === 401 || claimsRes.status === 401) {
+                    router.push("/employee/login");
                     return;
                 }
 
-                // Fetch user profile and claims in parallel
-                const [profileResponse, claimsResponse] = await Promise.all([
-                    fetch(`/api/employee/profile?userId=${userId}`),
-                    fetch(`/api/employee/claims?userId=${userId}`)
-                ]);
+                const profileData = await profileRes.json();
+                const claimsData = await claimsRes.json();
 
-                const profileData = await profileResponse.json();
-                const claimsData = await claimsResponse.json();
-
-                // Set first name
                 if (profileData.success) {
                     setFirstName(profileData.profile.firstName);
-                }
-
-                // Set last name
-                if (profileData.success) {
                     setLastName(profileData.profile.lastName);
                 }
 
-                // Set claims
                 if (claimsData.success) {
                     setClaims(claimsData.claims);
                 } else {
-                    setError('Failed to load claims');
+                    setError("Failed to load claims");
                 }
+
             } catch (err) {
-                setError('Error fetching data');
+                setError("Error fetching data");
             } finally {
                 setLoading(false);
             }
@@ -160,9 +153,9 @@ export default function EmployeeClaimForm() {
      * @function handleLogout
      * @returns {void}
      */
-    const handleLogout = () => {
-        localStorage.removeItem('userId');
-        router.push('/employee/login');
+    const handleLogout = async () => {
+        await fetch("/api/employee/logout", { method: "POST" });
+        router.push("/employee/login");
     };
     // Error state
     if (error) {

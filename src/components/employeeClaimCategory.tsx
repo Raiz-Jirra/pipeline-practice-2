@@ -80,10 +80,21 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
     /** Reference to hidden file input element */
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
-
     const params = useSearchParams();
-    const employeeIdFromUrl = params.get("employeeId");
+
     const isAdminFromUrl = params.get("admin") === "true";
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const res = await fetch("/api/employee/profile");
+
+            if (res.status === 401) {
+                router.push("/employee/login");
+            }
+        };
+
+        checkAuth();
+    }, [router]);
 
     /**
      * Handle Logout
@@ -95,9 +106,9 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
      * @function handleLogout
      * @returns {void}
      */
-    const handleLogout = () => {
-        localStorage.removeItem('userId');
-        router.push('/employee/login');
+    const handleLogout = async () => {
+        await fetch("/api/employee/logout", { method: "POST" });
+        router.push("/employee/login");
     };
 
     /**
@@ -113,20 +124,9 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
 
     useEffect(() => {
         const fetchCategories = async () => {
-            try {
-                const response = await fetch('/api/categories');
-                const data = await response.json();
-
-                if (response.ok && Array.isArray(data)) {
-                    setCategories(data);
-                } else {
-                    console.error('Failed to fetch categories:', data);
-                    setCategories([]);
-                }
-            } catch (error) {
-                console.error('Failed to fetch categories:', error);
-                setCategories([]);
-            }
+            const res = await fetch('/api/categories');
+            const data = await res.json();
+            setCategories(Array.isArray(data) ? data : []);
         };
 
         fetchCategories();
@@ -243,62 +243,47 @@ export default function ClaimCatagory({ employeeId, isAdmin }: { employeeId?: st
      * @returns {Promise<void>}
      */
     const handleSubmit = async () => {
-        if (!isFormValid() || submitting) return;
-
+        if (submitting) return;
         setSubmitting(true);
 
         try {
-            // Get userId from localStorage
-            const userId = employeeIdFromUrl || employeeId || localStorage.getItem('userId');
-            if (!userId) {
-                alert('Please log in to submit a claim');
-                router.push('/employee/login');
-                return;
-            }
-
-            // Build claim data object
-            const claimData = {
-                employeeId: userId,
-                category: selectedCategory,
-                description: claimDescription,
-                amount: claimAmount,
-                receipts: receiptImages.map(file => file.name),
-                travelDetails: selectedCategory === 'TRAVEL' ? {
-                    startLocation: returnTrip,
-                    endLocation: destination,
-                    estimatedMileage: 0
-                } : null,
-                medicalDetails: selectedCategory === 'MEDICAL' ? {
-                    specialExposure: facehuggerExposure
-                } : null
-            };
-
-            // Submit to API
             const response = await fetch('/api/employee/submitClaim', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(claimData)
+                body: JSON.stringify({
+                    category: selectedCategory,
+                    description: claimDescription,
+                    amount: claimAmount,
+                    receipts: receiptImages.map(file => file.name),
+                    travelDetails: selectedCategory === 'TRAVEL' ? {
+                        startLocation: returnTrip,
+                        endLocation: destination
+                    } : null,
+                    medicalDetails: selectedCategory === 'MEDICAL' ? {
+                        specialExposure: facehuggerExposure
+                    } : null
+                })
             });
 
             const result = await response.json();
 
             if (result.success) {
-                // Success! Navigate to success page
                 if (isAdminFromUrl || isAdmin) {
                     router.push(`/admin/dashboard/claims/create/success?admin=true`);
                 } else {
                     router.push('/employee/claim-success');
                 }
             } else {
-                alert(`Failed to submit claim: ${result.error || 'Unknown error'}`);
+                alert(result.error);
             }
-        } catch (error) {
-            console.error('Error submitting claim:', error);
-            alert('Error submitting claim. Please try again.');
+        } catch (err) {
+            console.error(err);
+            alert("Error submitting claim");
         } finally {
             setSubmitting(false);
         }
-    }
+    };
+
 
     return (
         <div className="min-h-screen bg-gray-100">

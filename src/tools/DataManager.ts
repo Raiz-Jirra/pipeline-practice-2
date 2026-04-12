@@ -2,10 +2,15 @@ import bcrypt from "bcrypt";
 import { MongoClient, ObjectId } from "mongodb";
 import sanitizeHtml from 'sanitize-html';
 import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
 
 
 /* ---------------------------------------------DATABASE CONFIGURATION*/
 
+const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 // MongoDB constants
 const MONGO_URL: string = process.env.MONGO_URL || "mongodb://mongo:27017";
 const MONGO_DB_NAME: string = "dbData";
@@ -40,11 +45,25 @@ export async function loginUser(request: NextRequest) {
             return NextResponse.json({ success: false });
         }
 
-        return NextResponse.json({
-            success: true,
-            role: user.role,
-            userId: user._id.toString()
+        const token = jwt.sign(
+            {
+                userId: user._id.toString(),
+                role: user.role
+            },
+            JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        const response = NextResponse.json({ success: true });
+
+        response.cookies.set("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/"
         });
+
+        return response;
 
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });
@@ -206,6 +225,27 @@ export async function deleteUser(request: NextRequest, id: string) {
 /* -------------------------------------------------------------CLAIMS*/
 
 export async function getAdminClaims() {
+    const token = (await cookies()).get("token")?.value;
+
+    if (!token) {
+        redirect("/admin/login");
+    }
+
+    let user: any;
+
+    try {
+        user = jwt.verify(token, JWT_SECRET);
+    } catch {
+        redirect("/admin/login");
+    }
+
+    if (user.role !== "ADMIN") {
+        redirect("/admin/login");
+    }
+
+
+
+
     let mongoClient: MongoClient = new MongoClient(MONGO_URL);
     let claims: any[];
 
@@ -254,7 +294,25 @@ export async function getAdminClaims() {
 
 
 // Show cliams table for enployees -- Robert Jones
-export async function getEmployeeClaims(userId?: string) {
+export async function getEmployeeClaims() {
+    const token = (await cookies()).get("token")?.value;
+
+    if (!token) {
+        redirect("/employee/login");
+    }
+
+    let user: any;
+
+    try {
+        user = jwt.verify(token, JWT_SECRET);
+    } catch {
+        redirect("/employee/login");
+    }
+
+    if (user.role !== "EMPLOYEE") {
+        redirect("/employee/login");
+    }
+
     const mongoClient = new MongoClient(MONGO_URL);
 
     try {
@@ -262,11 +320,11 @@ export async function getEmployeeClaims(userId?: string) {
         const db = mongoClient.db(MONGO_DB_NAME);
         const claims = db.collection("claims");
 
-        const filter = userId ? { employeeId: new ObjectId(userId) } : {};
-        const claimsData = await claims.find(filter).toArray();
+        const claimsData = await claims.find({
+            employeeId: new ObjectId(user.userId)
+        }).toArray();
 
-        // Map Database fields to component expectations
-        const formattedClaims = claimsData.map(claim => ({
+        return claimsData.map(claim => ({
             id: claim.claimId,
             date: claim.createdAt.toISOString().split('T')[0],
             category: claim.category,
@@ -276,11 +334,9 @@ export async function getEmployeeClaims(userId?: string) {
             comment: claim.comment || "",
         }));
 
-        return formattedClaims;
-
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-
+        console.log(error.message);
+        throw error;
     } finally {
         await mongoClient.close();
     }
@@ -442,6 +498,22 @@ export async function deleteCategory(request: NextRequest, id: string) {
 /* --------------------------------------------------------CLAIM CREATION*/
 
 export async function createClaim(request: NextRequest) {
+
+    const token = request.cookies.get("token")?.value;
+
+    if (!token) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let decoded: any;
+
+    try {
+        decoded = jwt.verify(token, JWT_SECRET);
+    } catch {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+
     const mongoClient = new MongoClient(MONGO_URL);
 
     try {
@@ -449,7 +521,7 @@ export async function createClaim(request: NextRequest) {
         const body = await request.json();
 
         // Sanitize inputs
-        const employeeId = new ObjectId(sanitizeHtml(body.employeeId));
+        const employeeId = new ObjectId(decoded.userId);
         const category = sanitizeHtml(body.category);
         const description = sanitizeHtml(body.description);
         const amount = parseFloat(sanitizeHtml(body.amount.toString()));
@@ -522,20 +594,38 @@ export async function createClaim(request: NextRequest) {
 
 
 /* -----------------------------------------------------------USER PROFILE*/
-
 export async function updateUserProfile(request: NextRequest) {
     const mongoClient = new MongoClient(MONGO_URL);
 
     try {
         await mongoClient.connect();
 
+        const token = request.cookies.get("token")?.value;
+
+        if (!token) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
+        let decoded: any;
+
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
         const body = await request.json();
 
-        const userId = sanitizeHtml(body.userId);
         const phoneNumber = sanitizeHtml(body.phoneNumber);
         const wyId = sanitizeHtml(body.wyId);
 
-        if (!userId || !phoneNumber || !wyId) {
+        if (!phoneNumber || !wyId) {
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 }
@@ -546,7 +636,7 @@ export async function updateUserProfile(request: NextRequest) {
         const users = db.collection("users");
 
         const result = await users.updateOne(
-            { _id: new ObjectId(userId) },
+            { _id: new ObjectId(decoded.userId) }, // 🔥 from JWT
             {
                 $set: {
                     phoneNumber,
