@@ -102,7 +102,8 @@ export async function sendJSONData(sendURL: string, sendJSON: any, requestType: 
             method: requestType,
             headers: { "content-type": "application/json" },
             body: JSON.stringify(sendJSON),
-            cache: 'no-store'
+            cache: 'no-store',
+            credentials: 'include'
         });
         const responseData: any = await response.json();
         return { data: responseData, status: response.status };

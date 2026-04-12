@@ -53,10 +53,7 @@ export default function Login() {
      * @returns {Promise<void>}
      */
     const grantAccess = async () => {
-        const result = await sendJSONData("/api/login", {
-            email,
-            password
-        });
+        const result = await sendJSONData("/api/login", { email, password });
 
         if (!result?.data?.success) {
             alert("Access Denied");
@@ -65,11 +62,17 @@ export default function Login() {
 
         const role = result.data.role;
 
-        if (role === "ADMIN") {
-            router.push("/admin/dashboard/claims");
-        } else if (!(role === "ADMIN")) {
-            alert("Access Denied: You do not have admin privileges.")
+        if (role !== "ADMIN") {
+            await fetch("/api/logout", {
+                method: "POST",
+                credentials: "include"
+            });
+
+            alert("Access Denied: Admins only");
+            return;
         }
+
+        window.location.href = "/admin/dashboard/claims";
     };
 
     return (

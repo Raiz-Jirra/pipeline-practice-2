@@ -5,7 +5,7 @@ import EmployeeClaimSubmit from "@/components/employeeClaimSubmit";
 import Link from "next/link";
 
 export default function CreateClaim({ users }: { users: any[] }) {
-    const [selectedUser, setSelectedUser] = useState("");
+    const [selectedUser, setSelectedUser] = useState<any>(null);
 
     return (
         <div className="space-y-6">
@@ -27,11 +27,14 @@ export default function CreateClaim({ users }: { users: any[] }) {
                 </label>
 
                 <select
-                    value={selectedUser}
-                    onChange={(e) => setSelectedUser(e.target.value)}
+                    value={selectedUser?.id || ""}
+                    onChange={(e) => {
+                        const user = users.find(u => u.id === e.target.value);
+                        setSelectedUser(user);
+                    }}
                     className="border p-2 rounded w-full"
                 >
-                    <option value="">-- Choose Employee --</option>
+                    <option value={""}>-- Choose Employee --</option>
 
                     {users.map(user => (
                         <option key={user.id} value={user.id}>
@@ -44,7 +47,9 @@ export default function CreateClaim({ users }: { users: any[] }) {
             {selectedUser && (
                 <div className="bg-white p-6 rounded shadow">
                     <EmployeeClaimSubmit
-                        employeeId={selectedUser}
+                        key={selectedUser.id} // 
+                        employeeId={selectedUser.id}
+                        employee={selectedUser}
                         isAdmin={true}
                     />
                 </div>

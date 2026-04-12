@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('userId');
 
-        const claims = await getEmployeeClaims(userId || undefined);
+        const claims = await getEmployeeClaims();
 
         return NextResponse.json({
             success: true,

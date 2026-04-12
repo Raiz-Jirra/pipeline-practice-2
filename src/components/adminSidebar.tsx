@@ -61,7 +61,18 @@ export default function AdminSidebar() {
                     );
                 })}
             </nav>
-            <div className="p-4 border-t border-slate-800 text-xs text-slate-500">
+            <div className="p-4 border-t border-slate-800">
+                <button
+                    onClick={async () => {
+                        await fetch("/api/logout", { method: "POST", credentials: "include" },);
+                        window.location.href = "/admin/login";
+                    }}
+                    className="w-full bg-gray-600 text-white py-2 rounded-md hover:bg-gray-400 transition font-medium"
+                >
+                    Log Out
+                </button>
+            </div>
+            <div className="p-4 border-t  border-slate-800 text-xs text-slate-500">
                 v2.0 Admin
             </div>
         </aside>

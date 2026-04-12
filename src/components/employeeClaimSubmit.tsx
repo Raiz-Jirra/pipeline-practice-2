@@ -42,9 +42,11 @@ import { useRouter } from 'next/navigation';
  */
 export default function EmployeeClaimSubmit({
     employeeId,
+    employee,
     isAdmin
 }: {
     employeeId?: string;
+    employee?: any;
     isAdmin?: boolean;
 }) {
 
@@ -60,55 +62,36 @@ export default function EmployeeClaimSubmit({
     const router = useRouter();
 
     /**
-     * Authentication Check Effect
+     * Authentication Check Effect and Profile Data Fetching Effect
      * 
-     * Verifies user is logged in on component mount.
+     * Verifies user is logged in on component mount and Fetches user to pre-fill WY ID and phone number.
      */
     useEffect(() => {
-        const userId = employeeId || localStorage.getItem('userId');
+        const loadProfile = async () => {
+            // ADMIN FLOW → use passed employee
+            if (employee) {
+                setWyId(employee.wyId || "");
+                setPhoneNumber(employee.phoneNumber || "");
+                return;
+            }
 
-        if (!userId) {
-            router.push('/employee/login');
-        }
-    }, [employeeId, router]);
+            // EMPLOYEE FLOW → fetch own profile
+            if (!isAdmin) {
+                try {
+                    const res = await fetch("/api/employee/profile");
+                    const data = await res.json();
 
-    /**
-     * Profile Data Fetching Effect
-     * 
-     * Fetches user profile to pre-fill WY ID and phone number.
-     */
-    useEffect(() => {
-        const fetchProfile = async () => {
-            const userId = employeeId || localStorage.getItem('userId');
-
-            if (userId) {
-                const res = await fetch(`/api/employee/profile?userId=${userId}`);
-                const data = await res.json();
-
-                if (data.success && data.profile) {
-                    setWyId(data.profile.wyId);
-                    setPhoneNumber(data.profile.phoneNumber);
+                    setWyId(data.wyId || "");
+                    setPhoneNumber(data.phoneNumber || "");
+                } catch (err) {
+                    console.error("Failed to load profile", err);
                 }
             }
         };
 
-        fetchProfile();
-    }, [employeeId]);
+        loadProfile();
+    }, [employee, isAdmin]);
 
-    /**
-     * Handle Logout
-     * 
-     * Clears user session data from localStorage and redirects
-     * to the employee login page.
-     * 
-     * @author Robert Jones
-     * @function handleLogout
-     * @returns {void}
-     */
-    const handleLogout = () => {
-        localStorage.removeItem('userId');
-        router.push('/employee/login');
-    };
 
     /**
      * Form Validation Check
@@ -139,38 +122,27 @@ export default function EmployeeClaimSubmit({
         setSubmitting(true);
 
         try {
-            const userId = employeeId || localStorage.getItem('userId');
-
-            if (!userId) {
-                alert('Please log in to continue');
-                router.push('/employee/login');
-                return;
-            }
-
             const res = await fetch('/api/employee/updateProfile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId,
                     phoneNumber,
-                    wyId
+                    wyId,
+                    userId: employeeId
                 })
             });
 
             const result = await res.json();
 
             if (result.success) {
-
                 if (isAdmin) {
-                    router.push(`/admin/dashboard/claims/create/category?employeeId=${userId}&admin=true`);
+                    router.push(`/admin/dashboard/claims/create/category?admin=true&employeeId=${employeeId}`);
                 } else {
                     router.push('/employee/claim-category');
                 }
-
             } else {
                 alert(result.error || 'Failed to save information');
             }
-
         } catch (err) {
             console.error(err);
             alert('Error saving information');
@@ -180,7 +152,7 @@ export default function EmployeeClaimSubmit({
     };
 
     return (
-        <div className="container mx-auto p-6 max-w-6xl">
+        <div className="min-h-screen bg-gray-100">
 
             {/* Header */}
             <div className="min-h-screen bg-gray-100">
@@ -195,32 +167,33 @@ export default function EmployeeClaimSubmit({
                                     <p className="text-sm text-gray-600">Employee Claims Service</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={handleLogout}
-                                className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition font-medium"
-                            >
-                                Log Out
-                            </button>
+
                         </div>
                     </div>
                 </header>
 
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-xl mx-auto px-6 py-10">
 
-                    <div className="mb-6">
-                        <h1 className="text-3xl font-bold mb-2">Submit Your Claim!</h1>
-                        <p className="text-gray-600">Please fill out the form below</p>
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Submit Your Claim
+                        </h1>
+                        <p className="text-gray-500 mt-1">
+                            Please confirm your details before continuing
+                        </p>
                     </div>
 
 
 
-                    <div className="bg-white rounded-lg shadow p-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 space-y-6">
 
-                        <h2 className="text-xl font-semibold mb-6">
+                        <h2 className="text-lg font-semibold text-gray-900">
                             Employee Information
                         </h2>
 
-                        <div className="flex gap-4 mb-4">
+                        <hr className="border-gray-200" />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                             {/* WY ID */}
                             <div className="flex-1">
@@ -230,7 +203,7 @@ export default function EmployeeClaimSubmit({
                                 <input
                                     type="text"
                                     value={wyId}
-                                    className="w-full border rounded px-4 py-2"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-700"
                                     disabled
                                 />
                             </div>
@@ -243,16 +216,16 @@ export default function EmployeeClaimSubmit({
                                 <input
                                     type="tel"
                                     value={phoneNumber}
-                                    className="w-full border rounded px-4 py-2"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-700"
                                     disabled
                                 />
                             </div>
                         </div>
 
-                        <div className="flex justify-between mt-6">
+                        <div className="flex justify-between items-center pt-4">
 
                             <Link href={isAdmin ? "/admin/dashboard/claims" : "/employee/claim-dashboard"}>
-                                <button className="bg-gray-500 text-white px-6 py-3 rounded-lg">
+                                <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition">
                                     Cancel
                                 </button>
                             </Link>
@@ -260,7 +233,7 @@ export default function EmployeeClaimSubmit({
                             <button
                                 onClick={handleNext}
                                 disabled={!isFormValid() || submitting}
-                                className="bg-blue-600 text-white px-6 py-3 rounded-lg"
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
                             >
                                 {submitting ? 'Saving...' : 'Next'}
                             </button>

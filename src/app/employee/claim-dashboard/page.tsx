@@ -84,40 +84,36 @@ export default function EmployeeClaimForm() {
             try {
                 setLoading(true);
 
-                // Check if user is logged in
-                const userId = localStorage.getItem('userId');
-                if (!userId) {
-                    router.push('/employee/login');
+                // Fetch user profile and claims in parallel
+                const [profileRes, claimsRes] = await Promise.all([
+                    fetch("/api/employee/profile"),
+                    fetch("/api/employee/claims")
+                ]);
+
+                if (profileRes.status === 401 || claimsRes.status === 401) {
+                    router.push("/employee/login");
                     return;
                 }
 
-                // Fetch user profile and claims in parallel
-                const [profileResponse, claimsResponse] = await Promise.all([
-                    fetch(`/api/employee/profile?userId=${userId}`),
-                    fetch(`/api/employee/claims?userId=${userId}`)
-                ]);
+                const profileData = await profileRes.json();
+                const claimsData = await claimsRes.json();
 
-                const profileData = await profileResponse.json();
-                const claimsData = await claimsResponse.json();
 
-                // Set first name
-                if (profileData.success) {
-                    setFirstName(profileData.profile.firstName);
+
+                if (profileData) {
+                    setFirstName(profileData.firstName || "User");
+                    setLastName(profileData.lastName || "");
                 }
 
-                // Set last name
-                if (profileData.success) {
-                    setLastName(profileData.profile.lastName);
-                }
 
-                // Set claims
                 if (claimsData.success) {
                     setClaims(claimsData.claims);
                 } else {
-                    setError('Failed to load claims');
+                    setError("Failed to load claims");
                 }
+
             } catch (err) {
-                setError('Error fetching data');
+                setError("Error fetching data");
             } finally {
                 setLoading(false);
             }
@@ -160,10 +156,21 @@ export default function EmployeeClaimForm() {
      * @function handleLogout
      * @returns {void}
      */
-    const handleLogout = () => {
-        localStorage.removeItem('userId');
-        router.push('/employee/login');
+    const handleLogout = async () => {
+        await fetch("/api/logout", {
+            method: "POST",
+            credentials: "include"
+        });
+
+        window.location.href = "/employee/login";
     };
+
+    if (loading) {
+        return (
+            <LoadingOverlay show={loading} bgColor="rgba(17, 24, 39, 0.8)" spinnerColor="#3B82F6" />
+        );
+    }
+
     // Error state
     if (error) {
         return (
@@ -180,7 +187,7 @@ export default function EmployeeClaimForm() {
 
     return (
         <div>
-            <LoadingOverlay show={loading} bgColor="rgba(17, 24, 39, 0.8)" spinnerColor="#3B82F6" />
+
             <div className="min-h-screen bg-gray-100">
                 {/* Header */}
                 <header className="bg-white shadow-sm border-b border-gray-200">
@@ -202,6 +209,8 @@ export default function EmployeeClaimForm() {
                         </div>
                     </div>
                 </header>
+
+
 
                 {/* Main Content */}
                 <main className="max-w-7xl mx-auto px-6 py-8">

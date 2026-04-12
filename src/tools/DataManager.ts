@@ -2,10 +2,17 @@ import bcrypt from "bcrypt";
 import { MongoClient, ObjectId } from "mongodb";
 import sanitizeHtml from 'sanitize-html';
 import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import fs from "fs";
+import path from "path";
+
 
 
 /* ---------------------------------------------DATABASE CONFIGURATION*/
 
+const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 // MongoDB constants
 const MONGO_URL: string = process.env.MONGO_URL || "mongodb://mongo:27017";
 const MONGO_DB_NAME: string = "dbData";
@@ -40,11 +47,31 @@ export async function loginUser(request: NextRequest) {
             return NextResponse.json({ success: false });
         }
 
-        return NextResponse.json({
-            success: true,
-            role: user.role,
-            userId: user._id.toString()
+        const token = jwt.sign(
+            {
+                userId: user._id.toString(),
+                role: user.role
+            },
+            JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        let redirectPath = "/employee/claim-dashboard";
+
+        if (user.role === "ADMIN") {
+            redirectPath = "/admin/dashboard/claims";
+        }
+
+        const response = NextResponse.json({ success: true, role: user.role });
+
+        response.cookies.set("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/"
         });
+
+        return response;
 
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });
@@ -206,6 +233,24 @@ export async function deleteUser(request: NextRequest, id: string) {
 /* -------------------------------------------------------------CLAIMS*/
 
 export async function getAdminClaims() {
+    const token = (await cookies()).get("token")?.value;
+
+    if (!token) {
+        redirect("/admin/login");
+    }
+
+    let user: any;
+
+    try {
+        user = jwt.verify(token, JWT_SECRET);
+    } catch {
+        redirect("/admin/login");
+    }
+
+    if (user.role !== "ADMIN") {
+        redirect("/admin/login");
+    }
+
     let mongoClient: MongoClient = new MongoClient(MONGO_URL);
     let claims: any[];
 
@@ -237,6 +282,8 @@ export async function getAdminClaims() {
             status: claim.status,
             comment: claim.comment || "",
             imageUrls: (claim.receipts || []).map((file: string) => `/uploads/${file}`),
+            travelDetails: claim.travelDetails || null,
+            medicalDetails: claim.medicalDetails || null,
             date: claim.date?.toISOString(),
             createdAt: claim.createdAt?.toISOString(),
             firstName: claim.employee.firstName,
@@ -254,7 +301,25 @@ export async function getAdminClaims() {
 
 
 // Show cliams table for enployees -- Robert Jones
-export async function getEmployeeClaims(userId?: string) {
+export async function getEmployeeClaims() {
+    const token = (await cookies()).get("token")?.value;
+
+    if (!token) {
+        redirect("/employee/login");
+    }
+
+    let user: any;
+
+    try {
+        user = jwt.verify(token, JWT_SECRET);
+    } catch {
+        redirect("/employee/login");
+    }
+
+    if (user.role !== "EMPLOYEE") {
+        redirect("/employee/login");
+    }
+
     const mongoClient = new MongoClient(MONGO_URL);
 
     try {
@@ -262,11 +327,11 @@ export async function getEmployeeClaims(userId?: string) {
         const db = mongoClient.db(MONGO_DB_NAME);
         const claims = db.collection("claims");
 
-        const filter = userId ? { employeeId: new ObjectId(userId) } : {};
-        const claimsData = await claims.find(filter).toArray();
+        const claimsData = await claims.find({
+            employeeId: new ObjectId(user.userId)
+        }).toArray();
 
-        // Map Database fields to component expectations
-        const formattedClaims = claimsData.map(claim => ({
+        return claimsData.map(claim => ({
             id: claim.claimId,
             date: claim.createdAt.toISOString().split('T')[0],
             category: claim.category,
@@ -274,13 +339,12 @@ export async function getEmployeeClaims(userId?: string) {
             status: claim.status.toLowerCase(),
             description: claim.description,
             comment: claim.comment || "",
+            receipts: claim.receipts || []
         }));
 
-        return formattedClaims;
-
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-
+        console.log(error.message);
+        throw error;
     } finally {
         await mongoClient.close();
     }
@@ -302,7 +366,9 @@ export async function getEmployees() {
         return employees.map(user => ({
             id: user._id.toString(),
             firstName: user.firstName,
-            lastName: user.lastName
+            lastName: user.lastName,
+            wyId: user.wyId || "",
+            phoneNumber: user.phoneNumber || ""
         }));
 
     } catch (error: any) {
@@ -442,26 +508,89 @@ export async function deleteCategory(request: NextRequest, id: string) {
 /* --------------------------------------------------------CLAIM CREATION*/
 
 export async function createClaim(request: NextRequest) {
+    const token = request.cookies.get("token")?.value;
+
+    if (!token) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let decoded: any;
+
+    try {
+        decoded = jwt.verify(token, JWT_SECRET);
+    } catch {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const mongoClient = new MongoClient(MONGO_URL);
 
     try {
         await mongoClient.connect();
-        const body = await request.json();
 
-        // Sanitize inputs
-        const employeeId = new ObjectId(sanitizeHtml(body.employeeId));
-        const category = sanitizeHtml(body.category);
-        const description = sanitizeHtml(body.description);
-        const amount = parseFloat(sanitizeHtml(body.amount.toString()));
+        const formData = await request.formData();
+
+        let employeeId: ObjectId;
+
+        if (decoded.role === "ADMIN") {
+            const formEmployeeId = formData.get("employeeId") as string;
+
+            if (!formEmployeeId) {
+                return NextResponse.json(
+                    { error: "Employee required" },
+                    { status: 400 }
+                );
+            }
+
+            employeeId = new ObjectId(formEmployeeId);
+
+        } else {
+            employeeId = new ObjectId(decoded.userId);
+        }
+
+        const category = sanitizeHtml(formData.get("category") as string);
+        const description = sanitizeHtml(formData.get("description") as string);
+        const amount = parseFloat(
+            sanitizeHtml(formData.get("amount") as string)
+        );
+
+        const files = formData.getAll("receipts") as File[];
+
+        const uploadDir = path.join(process.cwd(), "public/uploads");
+
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const fileNames: string[] = [];
+
+        for (const file of files) {
+            if (!file || file.size === 0) continue;
+
+            const bytes = await file.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+
+            const safeName = file.name.replace(/\s+/g, "_");
+
+            const fileName = `${Date.now()}-${safeName}`;
+            const filePath = path.join(uploadDir, fileName);
+
+            fs.writeFileSync(filePath, buffer);
+
+            fileNames.push(fileName);
+        }
 
         const db = mongoClient.db(MONGO_DB_NAME);
         const claims = db.collection("claims");
 
-        // Generate unique claim ID
         const claimCount = await claims.countDocuments();
-        const claimId = `CLM-${String(claimCount + 1).padStart(3, '0')}`;
+        const claimId = `CLM-${String(claimCount + 1).padStart(3, "0")}`;
 
-        // Build claim object
+        const travelDetailsRaw = formData.get("travelDetails") as string | null;
+        const medicalDetailsRaw = formData.get("medicalDetails") as string | null;
+
+        const travelDetails = travelDetailsRaw ? JSON.parse(travelDetailsRaw) : null;
+        const medicalDetails = medicalDetailsRaw ? JSON.parse(medicalDetailsRaw) : null;
+
         const newClaim: any = {
             claimId,
             employeeId,
@@ -469,29 +598,25 @@ export async function createClaim(request: NextRequest) {
             category,
             description,
             amount,
-            receipts: body.receipts || [],
+            receipts: fileNames,
             status: "PENDING",
-            createdAt: new Date()
+            createdAt: new Date(),
+            travelDetails: null,
+            medicalDetails: null
         };
 
-        // Add category-specific details
-        if (category === "TRAVEL" && body.travelDetails) {
+        if (category === "TRAVEL" && travelDetails) {
             newClaim.travelDetails = {
-                startLocation: sanitizeHtml(body.travelDetails.startLocation),
-                endLocation: sanitizeHtml(body.travelDetails.endLocation),
-                estimatedMileage: body.travelDetails.estimatedMileage || 0
+                startLocation: sanitizeHtml(travelDetails.startLocation),
+                endLocation: sanitizeHtml(travelDetails.endLocation),
+                estimatedMileage: travelDetails.estimatedMileage || 0
             };
-            newClaim.medicalDetails = null;
+        }
 
-        } else if (category === "MEDICAL" && body.medicalDetails) {
+        if (category === "MEDICAL" && medicalDetails) {
             newClaim.medicalDetails = {
-                specialExposure: body.medicalDetails.specialExposure || false
+                specialExposure: medicalDetails.specialExposure || false
             };
-            newClaim.travelDetails = null;
-
-        } else {
-            newClaim.travelDetails = null;
-            newClaim.medicalDetails = null;
         }
 
         const result = await claims.insertOne(newClaim);
@@ -513,7 +638,6 @@ export async function createClaim(request: NextRequest) {
             { error: error.message },
             { status: 500 }
         );
-
     } finally {
         await mongoClient.close();
     }
@@ -522,20 +646,38 @@ export async function createClaim(request: NextRequest) {
 
 
 /* -----------------------------------------------------------USER PROFILE*/
-
 export async function updateUserProfile(request: NextRequest) {
     const mongoClient = new MongoClient(MONGO_URL);
 
     try {
         await mongoClient.connect();
 
+        const token = request.cookies.get("token")?.value;
+
+        if (!token) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
+        let decoded: any;
+
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
         const body = await request.json();
 
-        const userId = sanitizeHtml(body.userId);
         const phoneNumber = sanitizeHtml(body.phoneNumber);
         const wyId = sanitizeHtml(body.wyId);
 
-        if (!userId || !phoneNumber || !wyId) {
+        if (!phoneNumber || !wyId) {
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 }
@@ -546,7 +688,7 @@ export async function updateUserProfile(request: NextRequest) {
         const users = db.collection("users");
 
         const result = await users.updateOne(
-            { _id: new ObjectId(userId) },
+            { _id: new ObjectId(decoded.userId) },
             {
                 $set: {
                     phoneNumber,

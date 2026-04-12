@@ -1,26 +1,31 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 import { getUserProfile } from "@/tools/DataManager";
 
-export async function GET(request: NextRequest) {
-    try {
-        // Extract userId from URL query parameters
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
-        // Validation: userId is required
-        if (!userId) {
-            return NextResponse.json(
-                { error: "User ID required" },
-                { status: 400 }
-            );
+export async function GET() {
+    try {
+        const token = (await cookies()).get("token")?.value;
+
+        if (!token) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const profile = await getUserProfile(userId);
-        return NextResponse.json({ success: true, profile });
-    } catch (error: any) {
-        return NextResponse.json(
-            { error: error.message },
-            { status: 500 }
-        );
+        let decoded: any;
+
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch {
+            return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+        }
+
+        const user = await getUserProfile(decoded.userId);
+
+        return NextResponse.json(user);
+
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }

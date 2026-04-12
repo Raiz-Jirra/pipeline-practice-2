@@ -54,10 +54,7 @@ export default function Login() {
      * @returns {Promise<void>}
      */
     const grantAccess = async () => {
-        const result = await sendJSONData("/api/login/", {
-            email,
-            password
-        });
+        const result = await sendJSONData("/api/login", { email, password });
 
         if (!result?.data?.success) {
             alert("Access Denied");
@@ -65,16 +62,18 @@ export default function Login() {
         }
 
         const role = result.data.role;
-        const userId = result.data.userId;
 
-        localStorage.setItem('userId', userId);
-        localStorage.setItem('userRole', role);
+        if (role !== "EMPLOYEE") {
+            await fetch("/api/logout", {
+                method: "POST",
+                credentials: "include"
+            });
 
-        if (role === "EMPLOYEE") {
-            router.push("/employee/claim-dashboard");
-        } else if (!(role === "EMPLOYEE")) {
-            alert("Access Denied: You do not have employee privileges.")
+            alert("Access Denied: Employees only");
+            return;
         }
+
+        window.location.href = "/employee/claim-dashboard";
     };
 
     return (
