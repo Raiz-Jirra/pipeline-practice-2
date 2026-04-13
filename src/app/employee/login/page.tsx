@@ -85,7 +85,7 @@ export default function Login() {
                         <img src="/images/weyyuLogo.png" alt="Company Logo" width={120} height={120} />
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900">Weyland-Yutani Corp</h1>
-                            <p className="text-sm text-gray-600">HELLO</p>
+                            <p className="text-sm text-gray-600">Rob</p>
                         </div>
                     </div>
                 </div>
