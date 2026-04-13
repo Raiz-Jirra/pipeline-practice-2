@@ -1,7 +1,7 @@
 import { getClaimCounts, getClaimsByCategory } from '@/tools/DataManager';
 import Reports from "@/components/reports";
 
-
+export const dynamic = 'force-dynamic';
 
 export default async function Page({ searchParams }: { searchParams: any }) {
     const start = searchParams.start;

@@ -1,6 +1,8 @@
 import { getCategories } from "@/tools/DataManager";
 import DeleteCategory from "@/components/DeleteCategory";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
 
     const categories = await getCategories();
