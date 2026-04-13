@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "production": "next build && next start"
+    "production": "next build && next start",
+    "test": "jest"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
